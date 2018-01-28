@@ -1,0 +1,1210 @@
+,state,year,cigsale,retprice,after_treatment
+0,Alabama,1970.0,89.8,39.6,True
+1,Alabama,1971.0,95.4,42.7,True
+2,Alabama,1972.0,101.1,42.3,True
+3,Alabama,1973.0,102.9,42.1,True
+4,Alabama,1974.0,108.2,43.1,True
+5,Alabama,1975.0,111.7,46.6,True
+6,Alabama,1976.0,116.2,50.4,True
+7,Alabama,1977.0,117.1,50.1,True
+8,Alabama,1978.0,123.0,55.1,True
+9,Alabama,1979.0,121.4,56.8,True
+10,Alabama,1980.0,123.2,60.6,True
+11,Alabama,1981.0,119.6,68.8,True
+12,Alabama,1982.0,119.1,73.1,True
+13,Alabama,1983.0,116.3,84.4,True
+14,Alabama,1984.0,113.0,90.8,True
+15,Alabama,1985.0,114.5,99.0,True
+16,Alabama,1986.0,116.3,103.0,True
+17,Alabama,1987.0,114.0,110.0,True
+18,Alabama,1988.0,112.1,114.4,False
+19,Alabama,1989.0,105.6,122.3,False
+20,Alabama,1990.0,108.6,139.1,False
+21,Alabama,1991.0,107.9,144.4,False
+22,Alabama,1992.0,109.1,172.2,False
+23,Alabama,1993.0,108.5,176.2,False
+24,Alabama,1994.0,107.1,154.6,False
+25,Alabama,1995.0,102.6,155.1,False
+26,Alabama,1996.0,101.4,158.3,False
+27,Alabama,1997.0,104.9,167.4,False
+28,Alabama,1998.0,106.2,180.5,False
+29,Alabama,1999.0,100.7,195.6,False
+30,Alabama,2000.0,96.2,270.7,False
+31,Arkansas,1970.0,100.3,36.7,True
+32,Arkansas,1971.0,104.1,38.8,True
+33,Arkansas,1972.0,103.9,44.1,True
+34,Arkansas,1973.0,108.0,45.1,True
+35,Arkansas,1974.0,109.7,45.5,True
+36,Arkansas,1975.0,114.8,48.6,True
+37,Arkansas,1976.0,119.1,50.9,True
+38,Arkansas,1977.0,122.6,52.6,True
+39,Arkansas,1978.0,127.3,56.5,True
+40,Arkansas,1979.0,126.5,58.4,True
+41,Arkansas,1980.0,131.8,61.5,True
+42,Arkansas,1981.0,128.7,64.7,True
+43,Arkansas,1982.0,127.4,72.1,True
+44,Arkansas,1983.0,128.0,82.0,True
+45,Arkansas,1984.0,123.1,93.6,True
+46,Arkansas,1985.0,125.8,98.5,True
+47,Arkansas,1986.0,126.0,103.6,True
+48,Arkansas,1987.0,122.3,113.0,True
+49,Arkansas,1988.0,121.5,119.9,False
+50,Arkansas,1989.0,118.3,127.7,False
+51,Arkansas,1990.0,113.1,141.2,False
+52,Arkansas,1991.0,116.8,146.5,False
+53,Arkansas,1992.0,126.0,177.3,False
+54,Arkansas,1993.0,113.8,179.9,False
+55,Arkansas,1994.0,108.8,168.1,False
+56,Arkansas,1995.0,113.0,167.3,False
+57,Arkansas,1996.0,110.7,167.1,False
+58,Arkansas,1997.0,108.7,181.3,False
+59,Arkansas,1998.0,109.5,187.3,False
+60,Arkansas,1999.0,104.8,206.9,False
+61,Arkansas,2000.0,99.4,279.3,False
+62,California,1970.0,123.0,38.8,True
+63,California,1971.0,121.0,39.7,True
+64,California,1972.0,123.5,39.9,True
+65,California,1973.0,124.4,39.9,True
+66,California,1974.0,126.7,41.9,True
+67,California,1975.0,127.1,45.0,True
+68,California,1976.0,128.0,48.3,True
+69,California,1977.0,126.4,49.0,True
+70,California,1978.0,126.1,58.7,True
+71,California,1979.0,121.9,60.1,True
+72,California,1980.0,120.2,62.1,True
+73,California,1981.0,118.6,66.4,True
+74,California,1982.0,115.4,72.8,True
+75,California,1983.0,110.8,84.9,True
+76,California,1984.0,104.8,94.9,True
+77,California,1985.0,102.8,98.0,True
+78,California,1986.0,99.7,104.4,True
+79,California,1987.0,97.5,103.9,True
+80,California,1988.0,90.1,117.4,False
+81,California,1989.0,82.4,126.4,False
+82,California,1990.0,77.8,163.8,False
+83,California,1991.0,68.7,186.8,False
+84,California,1992.0,67.5,201.9,False
+85,California,1993.0,63.4,205.1,False
+86,California,1994.0,58.6,190.3,False
+87,California,1995.0,56.4,195.1,False
+88,California,1996.0,54.5,197.9,False
+89,California,1997.0,53.8,200.3,False
+90,California,1998.0,52.3,207.8,False
+91,California,1999.0,47.2,224.9,False
+92,California,2000.0,41.6,351.2,False
+93,Colorado,1970.0,124.8,29.4,True
+94,Colorado,1971.0,125.5,31.1,True
+95,Colorado,1972.0,134.3,31.2,True
+96,Colorado,1973.0,137.9,32.7,True
+97,Colorado,1974.0,132.8,38.1,True
+98,Colorado,1975.0,131.0,41.7,True
+99,Colorado,1976.0,134.2,44.8,True
+100,Colorado,1977.0,132.0,44.7,True
+101,Colorado,1978.0,129.2,57.4,True
+102,Colorado,1979.0,131.5,52.8,True
+103,Colorado,1980.0,131.0,54.6,True
+104,Colorado,1981.0,133.8,58.1,True
+105,Colorado,1982.0,130.5,61.4,True
+106,Colorado,1983.0,125.3,73.3,True
+107,Colorado,1984.0,119.7,83.4,True
+108,Colorado,1985.0,112.4,93.1,True
+109,Colorado,1986.0,109.9,95.1,True
+110,Colorado,1987.0,102.4,108.6,True
+111,Colorado,1988.0,94.6,116.0,False
+112,Colorado,1989.0,88.8,130.8,False
+113,Colorado,1990.0,87.4,149.3,False
+114,Colorado,1991.0,90.2,152.6,False
+115,Colorado,1992.0,88.3,157.5,False
+116,Colorado,1993.0,88.6,168.2,False
+117,Colorado,1994.0,89.1,153.2,False
+118,Colorado,1995.0,85.4,164.2,False
+119,Colorado,1996.0,83.1,169.6,False
+120,Colorado,1997.0,81.3,174.4,False
+121,Colorado,1998.0,81.2,185.8,False
+122,Colorado,1999.0,79.6,204.2,False
+123,Colorado,2000.0,73.0,281.3,False
+124,Connecticut,1970.0,120.0,42.2,True
+125,Connecticut,1971.0,117.6,45.5,True
+126,Connecticut,1972.0,110.8,51.3,True
+127,Connecticut,1973.0,109.3,50.6,True
+128,Connecticut,1974.0,112.4,52.5,True
+129,Connecticut,1975.0,110.2,54.5,True
+130,Connecticut,1976.0,113.4,57.6,True
+131,Connecticut,1977.0,117.3,58.4,True
+132,Connecticut,1978.0,117.5,61.7,True
+133,Connecticut,1979.0,117.4,64.4,True
+134,Connecticut,1980.0,118.0,67.0,True
+135,Connecticut,1981.0,116.4,80.1,True
+136,Connecticut,1982.0,114.7,85.6,True
+137,Connecticut,1983.0,114.1,95.6,True
+138,Connecticut,1984.0,112.5,113.5,True
+139,Connecticut,1985.0,111.0,118.6,True
+140,Connecticut,1986.0,108.5,118.5,True
+141,Connecticut,1987.0,109.0,122.7,True
+142,Connecticut,1988.0,104.8,129.7,False
+143,Connecticut,1989.0,100.6,142.0,False
+144,Connecticut,1990.0,91.5,171.2,False
+145,Connecticut,1991.0,86.7,175.6,False
+146,Connecticut,1992.0,83.5,193.5,False
+147,Connecticut,1993.0,79.1,202.3,False
+148,Connecticut,1994.0,76.6,205.6,False
+149,Connecticut,1995.0,79.3,205.4,False
+150,Connecticut,1996.0,76.0,206.3,False
+151,Connecticut,1997.0,75.9,208.5,False
+152,Connecticut,1998.0,75.5,217.9,False
+153,Connecticut,1999.0,73.4,236.5,False
+154,Connecticut,2000.0,71.4,312.3,False
+155,Delaware,1970.0,155.0,39.0,True
+156,Delaware,1971.0,161.1,41.3,True
+157,Delaware,1972.0,156.3,44.7,True
+158,Delaware,1973.0,154.7,44.0,True
+159,Delaware,1974.0,151.3,44.2,True
+160,Delaware,1975.0,147.6,45.9,True
+161,Delaware,1976.0,153.0,50.1,True
+162,Delaware,1977.0,153.3,51.7,True
+163,Delaware,1978.0,155.5,58.7,True
+164,Delaware,1979.0,150.2,60.0,True
+165,Delaware,1980.0,150.5,62.7,True
+166,Delaware,1981.0,152.6,66.0,True
+167,Delaware,1982.0,154.1,74.1,True
+168,Delaware,1983.0,149.6,82.0,True
+169,Delaware,1984.0,144.0,91.1,True
+170,Delaware,1985.0,144.5,98.7,True
+171,Delaware,1986.0,142.4,105.2,True
+172,Delaware,1987.0,141.0,111.4,True
+173,Delaware,1988.0,137.1,119.3,False
+174,Delaware,1989.0,131.7,124.0,False
+175,Delaware,1990.0,127.2,140.0,False
+176,Delaware,1991.0,118.8,143.2,False
+177,Delaware,1992.0,120.0,174.7,False
+178,Delaware,1993.0,123.8,187.9,False
+179,Delaware,1994.0,126.1,152.5,False
+180,Delaware,1995.0,127.2,160.7,False
+181,Delaware,1996.0,128.3,169.1,False
+182,Delaware,1997.0,124.1,171.9,False
+183,Delaware,1998.0,132.8,179.2,False
+184,Delaware,1999.0,139.5,198.3,False
+185,Delaware,2000.0,140.7,276.2,False
+186,Georgia,1970.0,109.9,34.3,True
+187,Georgia,1971.0,115.7,35.8,True
+188,Georgia,1972.0,117.0,40.9,True
+189,Georgia,1973.0,119.8,42.4,True
+190,Georgia,1974.0,123.7,42.4,True
+191,Georgia,1975.0,122.9,44.5,True
+192,Georgia,1976.0,125.9,47.9,True
+193,Georgia,1977.0,127.9,49.5,True
+194,Georgia,1978.0,130.6,54.7,True
+195,Georgia,1979.0,131.0,56.6,True
+196,Georgia,1980.0,134.0,59.3,True
+197,Georgia,1981.0,131.7,62.6,True
+198,Georgia,1982.0,131.2,67.8,True
+199,Georgia,1983.0,128.6,78.9,True
+200,Georgia,1984.0,126.3,86.8,True
+201,Georgia,1985.0,128.8,90.7,True
+202,Georgia,1986.0,129.0,100.1,True
+203,Georgia,1987.0,129.3,103.9,True
+204,Georgia,1988.0,124.1,109.2,False
+205,Georgia,1989.0,117.1,122.4,False
+206,Georgia,1990.0,113.8,132.3,False
+207,Georgia,1991.0,109.6,138.2,False
+208,Georgia,1992.0,109.2,159.5,False
+209,Georgia,1993.0,109.2,167.2,False
+210,Georgia,1994.0,107.8,147.8,False
+211,Georgia,1995.0,100.3,153.8,False
+212,Georgia,1996.0,102.7,156.1,False
+213,Georgia,1997.0,100.6,158.9,False
+214,Georgia,1998.0,100.5,168.7,False
+215,Georgia,1999.0,97.1,188.0,False
+216,Georgia,2000.0,88.4,257.4,False
+217,Idaho,1970.0,102.4,33.8,True
+218,Idaho,1971.0,108.5,33.6,True
+219,Idaho,1972.0,126.1,33.7,True
+220,Idaho,1973.0,121.8,36.3,True
+221,Idaho,1974.0,125.6,38.0,True
+222,Idaho,1975.0,123.3,40.3,True
+223,Idaho,1976.0,125.1,42.5,True
+224,Idaho,1977.0,125.0,45.6,True
+225,Idaho,1978.0,122.8,51.5,True
+226,Idaho,1979.0,117.5,55.4,True
+227,Idaho,1980.0,115.2,56.4,True
+228,Idaho,1981.0,114.1,59.2,True
+229,Idaho,1982.0,111.5,67.6,True
+230,Idaho,1983.0,111.3,76.5,True
+231,Idaho,1984.0,103.6,88.5,True
+232,Idaho,1985.0,100.7,97.6,True
+233,Idaho,1986.0,96.7,99.9,True
+234,Idaho,1987.0,95.0,107.1,True
+235,Idaho,1988.0,84.5,121.9,False
+236,Idaho,1989.0,78.4,133.6,False
+237,Idaho,1990.0,90.1,141.3,False
+238,Idaho,1991.0,85.4,144.4,False
+239,Idaho,1992.0,85.1,167.2,False
+240,Idaho,1993.0,86.7,171.2,False
+241,Idaho,1994.0,93.0,150.5,False
+242,Idaho,1995.0,78.2,163.5,False
+243,Idaho,1996.0,73.6,176.5,False
+244,Idaho,1997.0,75.0,184.4,False
+245,Idaho,1998.0,78.9,187.1,False
+246,Idaho,1999.0,75.1,210.7,False
+247,Idaho,2000.0,66.9,275.9,False
+248,Illinois,1970.0,124.8,41.4,True
+249,Illinois,1971.0,125.6,41.4,True
+250,Illinois,1972.0,126.6,41.9,True
+251,Illinois,1973.0,124.4,41.0,True
+252,Illinois,1974.0,131.9,41.9,True
+253,Illinois,1975.0,131.8,45.2,True
+254,Illinois,1976.0,134.4,48.4,True
+255,Illinois,1977.0,134.0,49.4,True
+256,Illinois,1978.0,136.7,54.6,True
+257,Illinois,1979.0,135.3,56.8,True
+258,Illinois,1980.0,135.2,60.0,True
+259,Illinois,1981.0,133.0,63.1,True
+260,Illinois,1982.0,130.7,69.6,True
+261,Illinois,1983.0,127.9,80.8,True
+262,Illinois,1984.0,124.0,89.6,True
+263,Illinois,1985.0,121.6,96.7,True
+264,Illinois,1986.0,118.2,108.4,True
+265,Illinois,1987.0,109.5,116.2,True
+266,Illinois,1988.0,107.6,124.1,False
+267,Illinois,1989.0,104.6,132.7,False
+268,Illinois,1990.0,94.1,147.3,False
+269,Illinois,1991.0,96.1,154.0,False
+270,Illinois,1992.0,94.8,179.8,False
+271,Illinois,1993.0,94.6,187.5,False
+272,Illinois,1994.0,85.7,182.1,False
+273,Illinois,1995.0,84.3,185.2,False
+274,Illinois,1996.0,81.8,188.7,False
+275,Illinois,1997.0,79.6,198.7,False
+276,Illinois,1998.0,80.3,202.3,False
+277,Illinois,1999.0,72.2,240.5,False
+278,Illinois,2000.0,70.0,312.7,False
+279,Indiana,1970.0,134.6,30.6,True
+280,Indiana,1971.0,139.3,32.2,True
+281,Indiana,1972.0,149.2,32.5,True
+282,Indiana,1973.0,156.0,32.9,True
+283,Indiana,1974.0,159.6,34.5,True
+284,Indiana,1975.0,162.4,36.7,True
+285,Indiana,1976.0,166.6,38.7,True
+286,Indiana,1977.0,173.0,40.6,True
+287,Indiana,1978.0,150.9,50.0,True
+288,Indiana,1979.0,148.9,52.5,True
+289,Indiana,1980.0,146.9,53.7,True
+290,Indiana,1981.0,148.5,58.3,True
+291,Indiana,1982.0,147.7,65.1,True
+292,Indiana,1983.0,143.0,75.7,True
+293,Indiana,1984.0,137.8,85.2,True
+294,Indiana,1985.0,135.3,88.8,True
+295,Indiana,1986.0,137.6,93.6,True
+296,Indiana,1987.0,134.0,100.1,True
+297,Indiana,1988.0,134.0,109.3,False
+298,Indiana,1989.0,132.5,119.0,False
+299,Indiana,1990.0,128.3,130.8,False
+300,Indiana,1991.0,127.2,135.8,False
+301,Indiana,1992.0,128.2,153.5,False
+302,Indiana,1993.0,126.8,157.5,False
+303,Indiana,1994.0,128.2,146.6,False
+304,Indiana,1995.0,135.4,146.3,False
+305,Indiana,1996.0,135.1,147.8,False
+306,Indiana,1997.0,135.3,156.3,False
+307,Indiana,1998.0,135.9,166.8,False
+308,Indiana,1999.0,133.3,190.0,False
+309,Indiana,2000.0,125.5,260.2,False
+310,Iowa,1970.0,108.5,37.7,True
+311,Iowa,1971.0,108.4,38.5,True
+312,Iowa,1972.0,109.4,41.9,True
+313,Iowa,1973.0,110.6,41.9,True
+314,Iowa,1974.0,116.1,43.2,True
+315,Iowa,1975.0,120.5,45.4,True
+316,Iowa,1976.0,124.4,47.8,True
+317,Iowa,1977.0,125.5,49.4,True
+318,Iowa,1978.0,127.1,54.6,True
+319,Iowa,1979.0,124.2,56.4,True
+320,Iowa,1980.0,124.6,58.8,True
+321,Iowa,1981.0,132.9,61.4,True
+322,Iowa,1982.0,116.2,72.8,True
+323,Iowa,1983.0,115.6,84.0,True
+324,Iowa,1984.0,111.2,93.3,True
+325,Iowa,1985.0,109.4,99.5,True
+326,Iowa,1986.0,104.1,104.8,True
+327,Iowa,1987.0,101.1,117.1,True
+328,Iowa,1988.0,100.2,124.2,False
+329,Iowa,1989.0,94.4,145.1,False
+330,Iowa,1990.0,95.4,149.6,False
+331,Iowa,1991.0,97.1,155.4,False
+332,Iowa,1992.0,95.2,178.5,False
+333,Iowa,1993.0,92.5,189.7,False
+334,Iowa,1994.0,93.4,171.4,False
+335,Iowa,1995.0,93.0,179.0,False
+336,Iowa,1996.0,94.0,183.8,False
+337,Iowa,1997.0,93.9,189.3,False
+338,Iowa,1998.0,94.0,193.8,False
+339,Iowa,1999.0,91.7,213.0,False
+340,Iowa,2000.0,88.9,286.3,False
+341,Kansas,1970.0,114.0,34.2,True
+342,Kansas,1971.0,102.8,38.9,True
+343,Kansas,1972.0,111.0,38.8,True
+344,Kansas,1973.0,115.2,39.3,True
+345,Kansas,1974.0,118.6,40.2,True
+346,Kansas,1975.0,123.4,42.7,True
+347,Kansas,1976.0,127.7,46.6,True
+348,Kansas,1977.0,127.9,48.1,True
+349,Kansas,1978.0,127.1,52.6,True
+350,Kansas,1979.0,126.4,54.8,True
+351,Kansas,1980.0,127.1,58.3,True
+352,Kansas,1981.0,132.0,59.8,True
+353,Kansas,1982.0,130.9,65.1,True
+354,Kansas,1983.0,127.6,77.0,True
+355,Kansas,1984.0,121.7,91.0,True
+356,Kansas,1985.0,115.7,97.5,True
+357,Kansas,1986.0,109.4,103.0,True
+358,Kansas,1987.0,105.2,114.5,True
+359,Kansas,1988.0,103.2,123.9,False
+360,Kansas,1989.0,96.5,136.5,False
+361,Kansas,1990.0,94.3,145.8,False
+362,Kansas,1991.0,91.8,152.7,False
+363,Kansas,1992.0,90.0,174.2,False
+364,Kansas,1993.0,89.9,174.2,False
+365,Kansas,1994.0,89.1,159.6,False
+366,Kansas,1995.0,90.1,165.7,False
+367,Kansas,1996.0,88.7,167.7,False
+368,Kansas,1997.0,89.2,171.3,False
+369,Kansas,1998.0,87.6,184.3,False
+370,Kansas,1999.0,83.3,207.0,False
+371,Kansas,2000.0,79.8,271.2,False
+372,Kentucky,1970.0,155.8,28.3,True
+373,Kentucky,1971.0,163.5,30.1,True
+374,Kentucky,1972.0,179.4,30.6,True
+375,Kentucky,1973.0,201.9,30.6,True
+376,Kentucky,1974.0,212.4,31.5,True
+377,Kentucky,1975.0,223.0,33.3,True
+378,Kentucky,1976.0,230.9,36.0,True
+379,Kentucky,1977.0,229.4,36.9,True
+380,Kentucky,1978.0,224.7,41.4,True
+381,Kentucky,1979.0,214.9,43.4,True
+382,Kentucky,1980.0,215.3,46.3,True
+383,Kentucky,1981.0,209.7,49.4,True
+384,Kentucky,1982.0,210.6,56.3,True
+385,Kentucky,1983.0,201.1,66.4,True
+386,Kentucky,1984.0,183.2,75.4,True
+387,Kentucky,1985.0,182.4,79.3,True
+388,Kentucky,1986.0,179.8,85.4,True
+389,Kentucky,1987.0,171.2,90.5,True
+390,Kentucky,1988.0,173.2,94.4,False
+391,Kentucky,1989.0,171.6,103.8,False
+392,Kentucky,1990.0,182.5,115.6,False
+393,Kentucky,1991.0,170.4,120.5,False
+394,Kentucky,1992.0,167.6,135.8,False
+395,Kentucky,1993.0,167.6,145.4,False
+396,Kentucky,1994.0,170.1,132.8,False
+397,Kentucky,1995.0,175.3,134.8,False
+398,Kentucky,1996.0,179.0,139.8,False
+399,Kentucky,1997.0,186.8,145.6,False
+400,Kentucky,1998.0,171.3,155.7,False
+401,Kentucky,1999.0,165.3,179.2,False
+402,Kentucky,2000.0,156.2,243.4,False
+403,Louisiana,1970.0,115.9,34.3,True
+404,Louisiana,1971.0,119.8,39.3,True
+405,Louisiana,1972.0,125.3,40.0,True
+406,Louisiana,1973.0,126.7,39.9,True
+407,Louisiana,1974.0,129.9,41.6,True
+408,Louisiana,1975.0,133.6,44.3,True
+409,Louisiana,1976.0,139.6,48.1,True
+410,Louisiana,1977.0,140.0,48.9,True
+411,Louisiana,1978.0,142.7,54.2,True
+412,Louisiana,1979.0,140.1,57.1,True
+413,Louisiana,1980.0,143.8,60.0,True
+414,Louisiana,1981.0,144.0,62.6,True
+415,Louisiana,1982.0,143.9,70.3,True
+416,Louisiana,1983.0,133.7,80.7,True
+417,Louisiana,1984.0,128.9,90.7,True
+418,Louisiana,1985.0,125.0,103.0,True
+419,Louisiana,1986.0,121.2,105.1,True
+420,Louisiana,1987.0,116.5,117.8,True
+421,Louisiana,1988.0,110.9,120.4,False
+422,Louisiana,1989.0,103.6,130.7,False
+423,Louisiana,1990.0,101.5,143.4,False
+424,Louisiana,1991.0,107.2,149.6,False
+425,Louisiana,1992.0,108.5,178.1,False
+426,Louisiana,1993.0,106.2,180.5,False
+427,Louisiana,1994.0,105.3,157.4,False
+428,Louisiana,1995.0,105.7,155.8,False
+429,Louisiana,1996.0,106.8,165.3,False
+430,Louisiana,1997.0,105.3,166.9,False
+431,Louisiana,1998.0,103.2,185.9,False
+432,Louisiana,1999.0,101.0,208.0,False
+433,Louisiana,2000.0,104.3,281.2,False
+434,Maine,1970.0,128.5,38.0,True
+435,Maine,1971.0,133.2,38.8,True
+436,Maine,1972.0,136.5,41.5,True
+437,Maine,1973.0,138.0,41.0,True
+438,Maine,1974.0,142.1,41.8,True
+439,Maine,1975.0,140.7,46.7,True
+440,Maine,1976.0,144.9,49.9,True
+441,Maine,1977.0,145.6,50.9,True
+442,Maine,1978.0,143.9,55.0,True
+443,Maine,1979.0,138.5,54.5,True
+444,Maine,1980.0,141.2,59.0,True
+445,Maine,1981.0,138.9,62.9,True
+446,Maine,1982.0,139.5,69.7,True
+447,Maine,1983.0,135.4,80.8,True
+448,Maine,1984.0,135.5,93.7,True
+449,Maine,1985.0,127.9,98.1,True
+450,Maine,1986.0,119.0,112.7,True
+451,Maine,1987.0,125.0,121.2,True
+452,Maine,1988.0,125.0,129.0,False
+453,Maine,1989.0,122.4,144.4,False
+454,Maine,1990.0,117.5,160.1,False
+455,Maine,1991.0,116.1,165.8,False
+456,Maine,1992.0,114.5,187.7,False
+457,Maine,1993.0,108.5,192.6,False
+458,Maine,1994.0,101.6,178.3,False
+459,Maine,1995.0,102.3,184.9,False
+460,Maine,1996.0,100.0,186.9,False
+461,Maine,1997.0,101.1,190.2,False
+462,Maine,1998.0,94.5,219.6,False
+463,Maine,1999.0,85.5,267.8,False
+464,Maine,2000.0,82.9,330.5,False
+465,Minnesota,1970.0,104.3,39.1,True
+466,Minnesota,1971.0,116.4,40.1,True
+467,Minnesota,1972.0,96.8,45.2,True
+468,Minnesota,1973.0,106.8,45.6,True
+469,Minnesota,1974.0,110.6,47.0,True
+470,Minnesota,1975.0,111.5,49.4,True
+471,Minnesota,1976.0,116.7,52.1,True
+472,Minnesota,1977.0,117.2,53.1,True
+473,Minnesota,1978.0,118.9,57.9,True
+474,Minnesota,1979.0,118.3,60.9,True
+475,Minnesota,1980.0,117.7,63.0,True
+476,Minnesota,1981.0,120.8,65.8,True
+477,Minnesota,1982.0,119.4,71.7,True
+478,Minnesota,1983.0,113.2,87.3,True
+479,Minnesota,1984.0,110.8,99.2,True
+480,Minnesota,1985.0,113.0,101.5,True
+481,Minnesota,1986.0,104.3,116.3,True
+482,Minnesota,1987.0,108.8,120.1,True
+483,Minnesota,1988.0,94.1,141.7,False
+484,Minnesota,1989.0,92.3,152.5,False
+485,Minnesota,1990.0,90.7,162.3,False
+486,Minnesota,1991.0,86.2,173.9,False
+487,Minnesota,1992.0,83.8,197.7,False
+488,Minnesota,1993.0,81.6,215.6,False
+489,Minnesota,1994.0,83.4,196.1,False
+490,Minnesota,1995.0,84.1,202.2,False
+491,Minnesota,1996.0,81.7,208.6,False
+492,Minnesota,1997.0,84.1,216.8,False
+493,Minnesota,1998.0,83.2,220.2,False
+494,Minnesota,1999.0,80.7,227.4,False
+495,Minnesota,2000.0,76.0,303.6,False
+496,Mississippi,1970.0,93.4,36.2,True
+497,Mississippi,1971.0,105.4,37.5,True
+498,Mississippi,1972.0,112.1,37.4,True
+499,Mississippi,1973.0,115.0,37.3,True
+500,Mississippi,1974.0,117.1,41.4,True
+501,Mississippi,1975.0,116.8,43.0,True
+502,Mississippi,1976.0,120.9,46.4,True
+503,Mississippi,1977.0,122.1,48.8,True
+504,Mississippi,1978.0,124.9,53.6,True
+505,Mississippi,1979.0,123.9,56.5,True
+506,Mississippi,1980.0,127.0,59.7,True
+507,Mississippi,1981.0,125.3,63.0,True
+508,Mississippi,1982.0,125.8,69.2,True
+509,Mississippi,1983.0,122.3,78.6,True
+510,Mississippi,1984.0,116.4,89.0,True
+511,Mississippi,1985.0,115.3,96.4,True
+512,Mississippi,1986.0,113.2,106.0,True
+513,Mississippi,1987.0,110.0,115.8,True
+514,Mississippi,1988.0,109.0,122.6,False
+515,Mississippi,1989.0,108.3,125.8,False
+516,Mississippi,1990.0,101.8,139.9,False
+517,Mississippi,1991.0,105.6,142.7,False
+518,Mississippi,1992.0,103.9,160.8,False
+519,Mississippi,1993.0,105.4,177.8,False
+520,Mississippi,1994.0,106.0,156.9,False
+521,Mississippi,1995.0,107.5,153.9,False
+522,Mississippi,1996.0,106.9,161.2,False
+523,Mississippi,1997.0,106.3,168.6,False
+524,Mississippi,1998.0,107.0,175.8,False
+525,Mississippi,1999.0,103.9,199.5,False
+526,Mississippi,2000.0,97.2,272.0,False
+527,Missouri,1970.0,121.3,36.0,True
+528,Missouri,1971.0,127.6,36.8,True
+529,Missouri,1972.0,130.0,37.7,True
+530,Missouri,1973.0,132.1,37.7,True
+531,Missouri,1974.0,135.4,38.0,True
+532,Missouri,1975.0,135.6,43.5,True
+533,Missouri,1976.0,139.5,44.7,True
+534,Missouri,1977.0,140.8,45.9,True
+535,Missouri,1978.0,141.8,49.9,True
+536,Missouri,1979.0,140.2,52.2,True
+537,Missouri,1980.0,142.1,57.3,True
+538,Missouri,1981.0,140.5,59.9,True
+539,Missouri,1982.0,139.7,64.7,True
+540,Missouri,1983.0,134.1,74.8,True
+541,Missouri,1984.0,130.0,84.8,True
+542,Missouri,1985.0,129.2,93.7,True
+543,Missouri,1986.0,128.8,101.9,True
+544,Missouri,1987.0,128.7,108.5,True
+545,Missouri,1988.0,127.4,114.6,False
+546,Missouri,1989.0,122.8,118.9,False
+547,Missouri,1990.0,119.1,129.1,False
+548,Missouri,1991.0,119.9,132.5,False
+549,Missouri,1992.0,122.3,153.1,False
+550,Missouri,1993.0,121.6,157.6,False
+551,Missouri,1994.0,119.4,146.8,False
+552,Missouri,1995.0,124.0,150.3,False
+553,Missouri,1996.0,124.1,159.8,False
+554,Missouri,1997.0,120.6,163.4,False
+555,Missouri,1998.0,120.1,173.8,False
+556,Missouri,1999.0,118.0,197.0,False
+557,Missouri,2000.0,113.8,258.8,False
+558,Montana,1970.0,111.2,34.0,True
+559,Montana,1971.0,115.6,34.7,True
+560,Montana,1972.0,122.2,40.1,True
+561,Montana,1973.0,119.9,40.9,True
+562,Montana,1974.0,121.9,41.8,True
+563,Montana,1975.0,123.7,43.7,True
+564,Montana,1976.0,124.9,45.3,True
+565,Montana,1977.0,127.0,47.6,True
+566,Montana,1978.0,127.2,51.9,True
+567,Montana,1979.0,120.3,53.7,True
+568,Montana,1980.0,122.0,56.7,True
+569,Montana,1981.0,121.1,60.4,True
+570,Montana,1982.0,122.4,65.7,True
+571,Montana,1983.0,113.7,77.2,True
+572,Montana,1984.0,110.1,91.3,True
+573,Montana,1985.0,103.6,95.5,True
+574,Montana,1986.0,97.8,102.0,True
+575,Montana,1987.0,91.7,106.2,True
+576,Montana,1988.0,87.1,115.3,False
+577,Montana,1989.0,86.2,123.0,False
+578,Montana,1990.0,84.7,140.4,False
+579,Montana,1991.0,82.9,143.6,False
+580,Montana,1992.0,86.6,163.5,False
+581,Montana,1993.0,86.0,179.4,False
+582,Montana,1994.0,88.2,151.3,False
+583,Montana,1995.0,90.5,155.4,False
+584,Montana,1996.0,87.3,156.8,False
+585,Montana,1997.0,88.9,164.9,False
+586,Montana,1998.0,89.1,175.4,False
+587,Montana,1999.0,82.6,196.2,False
+588,Montana,2000.0,75.5,260.7,False
+589,Nebraska,1970.0,108.1,33.9,True
+590,Nebraska,1971.0,108.6,34.7,True
+591,Nebraska,1972.0,104.9,41.1,True
+592,Nebraska,1973.0,106.6,41.2,True
+593,Nebraska,1974.0,110.5,42.0,True
+594,Nebraska,1975.0,114.1,44.6,True
+595,Nebraska,1976.0,118.1,46.8,True
+596,Nebraska,1977.0,117.7,48.1,True
+597,Nebraska,1978.0,117.4,53.6,True
+598,Nebraska,1979.0,116.1,55.4,True
+599,Nebraska,1980.0,116.3,59.5,True
+600,Nebraska,1981.0,117.0,60.9,True
+601,Nebraska,1982.0,117.1,69.7,True
+602,Nebraska,1983.0,110.8,83.7,True
+603,Nebraska,1984.0,107.7,94.8,True
+604,Nebraska,1985.0,105.1,95.8,True
+605,Nebraska,1986.0,103.1,104.0,True
+606,Nebraska,1987.0,101.3,113.7,True
+607,Nebraska,1988.0,92.9,123.3,False
+608,Nebraska,1989.0,93.8,139.3,False
+609,Nebraska,1990.0,89.9,143.4,False
+610,Nebraska,1991.0,92.4,152.2,False
+611,Nebraska,1992.0,90.6,169.5,False
+612,Nebraska,1993.0,91.1,177.2,False
+613,Nebraska,1994.0,85.9,169.6,False
+614,Nebraska,1995.0,88.5,170.7,False
+615,Nebraska,1996.0,86.2,175.5,False
+616,Nebraska,1997.0,85.5,184.8,False
+617,Nebraska,1998.0,83.1,194.6,False
+618,Nebraska,1999.0,86.6,214.6,False
+619,Nebraska,2000.0,77.6,288.3,False
+620,Nevada,1970.0,189.5,38.9,True
+621,Nevada,1971.0,190.5,44.0,True
+622,Nevada,1972.0,198.6,40.6,True
+623,Nevada,1973.0,201.5,40.3,True
+624,Nevada,1974.0,204.7,41.9,True
+625,Nevada,1975.0,205.2,44.5,True
+626,Nevada,1976.0,201.4,44.9,True
+627,Nevada,1977.0,190.8,49.3,True
+628,Nevada,1978.0,187.0,54.3,True
+629,Nevada,1979.0,183.3,57.1,True
+630,Nevada,1980.0,177.7,63.1,True
+631,Nevada,1981.0,171.9,63.3,True
+632,Nevada,1982.0,165.1,71.6,True
+633,Nevada,1983.0,159.2,81.9,True
+634,Nevada,1984.0,136.6,99.8,True
+635,Nevada,1985.0,146.7,109.3,True
+636,Nevada,1986.0,142.6,106.6,True
+637,Nevada,1987.0,147.7,114.0,True
+638,Nevada,1988.0,141.9,129.6,False
+639,Nevada,1989.0,137.9,145.6,False
+640,Nevada,1990.0,137.3,173.7,False
+641,Nevada,1991.0,115.5,186.3,False
+642,Nevada,1992.0,110.0,193.8,False
+643,Nevada,1993.0,108.1,196.8,False
+644,Nevada,1994.0,105.2,190.3,False
+645,Nevada,1995.0,100.9,190.4,False
+646,Nevada,1996.0,99.0,195.0,False
+647,Nevada,1997.0,95.6,198.5,False
+648,Nevada,1998.0,102.4,200.6,False
+649,Nevada,1999.0,103.9,225.8,False
+650,Nevada,2000.0,93.2,303.5,False
+651,New Hampshire,1970.0,265.7,31.4,True
+652,New Hampshire,1971.0,278.0,34.1,True
+653,New Hampshire,1972.0,296.2,36.1,True
+654,New Hampshire,1973.0,279.0,36.9,True
+655,New Hampshire,1974.0,269.8,37.9,True
+656,New Hampshire,1975.0,269.1,40.8,True
+657,New Hampshire,1976.0,290.5,43.9,True
+658,New Hampshire,1977.0,278.8,45.0,True
+659,New Hampshire,1978.0,269.6,49.7,True
+660,New Hampshire,1979.0,254.6,53.2,True
+661,New Hampshire,1980.0,247.8,55.3,True
+662,New Hampshire,1981.0,245.4,58.4,True
+663,New Hampshire,1982.0,239.8,67.0,True
+664,New Hampshire,1983.0,232.9,74.7,True
+665,New Hampshire,1984.0,215.1,90.5,True
+666,New Hampshire,1985.0,201.1,89.2,True
+667,New Hampshire,1986.0,195.9,100.0,True
+668,New Hampshire,1987.0,195.1,102.0,True
+669,New Hampshire,1988.0,180.4,113.5,False
+670,New Hampshire,1989.0,172.9,125.9,False
+671,New Hampshire,1990.0,152.4,135.9,False
+672,New Hampshire,1991.0,144.8,153.9,False
+673,New Hampshire,1992.0,143.7,164.4,False
+674,New Hampshire,1993.0,148.9,181.1,False
+675,New Hampshire,1994.0,153.8,157.8,False
+676,New Hampshire,1995.0,158.5,163.9,False
+677,New Hampshire,1996.0,158.0,168.6,False
+678,New Hampshire,1997.0,174.4,176.6,False
+679,New Hampshire,1998.0,173.8,197.0,False
+680,New Hampshire,1999.0,171.7,222.8,False
+681,New Hampshire,2000.0,147.3,313.9,False
+682,New Mexico,1970.0,90.0,39.7,True
+683,New Mexico,1971.0,92.6,41.7,True
+684,New Mexico,1972.0,99.3,41.1,True
+685,New Mexico,1973.0,98.9,41.8,True
+686,New Mexico,1974.0,100.3,43.7,True
+687,New Mexico,1975.0,103.1,46.3,True
+688,New Mexico,1976.0,102.4,49.5,True
+689,New Mexico,1977.0,102.4,51.6,True
+690,New Mexico,1978.0,103.1,56.0,True
+691,New Mexico,1979.0,101.0,57.6,True
+692,New Mexico,1980.0,102.7,62.6,True
+693,New Mexico,1981.0,103.0,63.0,True
+694,New Mexico,1982.0,97.5,69.4,True
+695,New Mexico,1983.0,96.3,79.6,True
+696,New Mexico,1984.0,88.9,90.2,True
+697,New Mexico,1985.0,88.0,97.5,True
+698,New Mexico,1986.0,88.2,101.2,True
+699,New Mexico,1987.0,82.3,110.2,True
+700,New Mexico,1988.0,77.7,113.7,False
+701,New Mexico,1989.0,74.4,127.2,False
+702,New Mexico,1990.0,70.8,133.6,False
+703,New Mexico,1991.0,69.9,146.9,False
+704,New Mexico,1992.0,71.4,165.4,False
+705,New Mexico,1993.0,69.0,172.2,False
+706,New Mexico,1994.0,68.2,158.4,False
+707,New Mexico,1995.0,67.0,163.5,False
+708,New Mexico,1996.0,65.7,170.8,False
+709,New Mexico,1997.0,61.8,176.0,False
+710,New Mexico,1998.0,62.6,183.8,False
+711,New Mexico,1999.0,59.7,201.8,False
+712,New Mexico,2000.0,53.8,279.8,False
+713,North Carolina,1970.0,172.4,27.3,True
+714,North Carolina,1971.0,187.6,29.4,True
+715,North Carolina,1972.0,214.1,28.7,True
+716,North Carolina,1973.0,226.5,28.9,True
+717,North Carolina,1974.0,227.3,30.1,True
+718,North Carolina,1975.0,226.0,32.9,True
+719,North Carolina,1976.0,230.2,35.8,True
+720,North Carolina,1977.0,217.0,36.6,True
+721,North Carolina,1978.0,205.5,41.8,True
+722,North Carolina,1979.0,197.3,43.7,True
+723,North Carolina,1980.0,187.8,47.3,True
+724,North Carolina,1981.0,179.3,50.0,True
+725,North Carolina,1982.0,179.0,55.5,True
+726,North Carolina,1983.0,169.8,66.0,True
+727,North Carolina,1984.0,160.6,75.0,True
+728,North Carolina,1985.0,156.3,78.9,True
+729,North Carolina,1986.0,154.4,83.7,True
+730,North Carolina,1987.0,150.5,90.6,True
+731,North Carolina,1988.0,146.0,96.0,False
+732,North Carolina,1989.0,139.3,107.6,False
+733,North Carolina,1990.0,133.7,116.4,False
+734,North Carolina,1991.0,132.7,126.6,False
+735,North Carolina,1992.0,128.9,145.0,False
+736,North Carolina,1993.0,129.7,153.5,False
+737,North Carolina,1994.0,112.7,135.9,False
+738,North Carolina,1995.0,124.9,142.3,False
+739,North Carolina,1996.0,129.7,145.6,False
+740,North Carolina,1997.0,125.6,152.0,False
+741,North Carolina,1998.0,126.0,167.6,False
+742,North Carolina,1999.0,113.1,186.8,False
+743,North Carolina,2000.0,109.0,257.3,False
+744,North Dakota,1970.0,93.8,37.3,True
+745,North Dakota,1971.0,98.5,38.9,True
+746,North Dakota,1972.0,103.8,38.9,True
+747,North Dakota,1973.0,108.7,39.4,True
+748,North Dakota,1974.0,110.5,39.9,True
+749,North Dakota,1975.0,117.9,42.6,True
+750,North Dakota,1976.0,125.4,45.9,True
+751,North Dakota,1977.0,122.2,47.4,True
+752,North Dakota,1978.0,121.9,53.2,True
+753,North Dakota,1979.0,121.3,55.0,True
+754,North Dakota,1980.0,123.7,59.6,True
+755,North Dakota,1981.0,125.7,62.0,True
+756,North Dakota,1982.0,126.8,67.8,True
+757,North Dakota,1983.0,119.6,77.9,True
+758,North Dakota,1984.0,109.4,94.4,True
+759,North Dakota,1985.0,103.2,100.6,True
+760,North Dakota,1986.0,99.8,104.2,True
+761,North Dakota,1987.0,92.3,110.3,True
+762,North Dakota,1988.0,87.1,123.3,False
+763,North Dakota,1989.0,84.1,135.9,False
+764,North Dakota,1990.0,77.1,144.3,False
+765,North Dakota,1991.0,85.2,159.8,False
+766,North Dakota,1992.0,74.3,168.3,False
+767,North Dakota,1993.0,83.0,177.6,False
+768,North Dakota,1994.0,81.0,180.1,False
+769,North Dakota,1995.0,80.6,179.5,False
+770,North Dakota,1996.0,80.8,182.7,False
+771,North Dakota,1997.0,77.5,194.1,False
+772,North Dakota,1998.0,79.1,205.2,False
+773,North Dakota,1999.0,74.7,223.6,False
+774,North Dakota,2000.0,72.5,297.5,False
+775,Ohio,1970.0,121.6,36.6,True
+776,Ohio,1971.0,124.6,38.1,True
+777,Ohio,1972.0,124.4,38.4,True
+778,Ohio,1973.0,120.5,42.0,True
+779,Ohio,1974.0,122.1,42.9,True
+780,Ohio,1975.0,122.5,46.0,True
+781,Ohio,1976.0,124.6,48.5,True
+782,Ohio,1977.0,127.3,49.8,True
+783,Ohio,1978.0,131.3,53.9,True
+784,Ohio,1979.0,130.9,56.3,True
+785,Ohio,1980.0,133.5,58.7,True
+786,Ohio,1981.0,132.8,61.4,True
+787,Ohio,1982.0,134.0,68.3,True
+788,Ohio,1983.0,130.0,82.5,True
+789,Ohio,1984.0,127.1,89.2,True
+790,Ohio,1985.0,126.7,92.2,True
+791,Ohio,1986.0,126.3,98.1,True
+792,Ohio,1987.0,124.6,102.2,True
+793,Ohio,1988.0,122.4,108.4,False
+794,Ohio,1989.0,118.6,120.5,False
+795,Ohio,1990.0,115.5,135.4,False
+796,Ohio,1991.0,113.2,139.8,False
+797,Ohio,1992.0,112.3,159.6,False
+798,Ohio,1993.0,108.9,162.5,False
+799,Ohio,1994.0,108.6,151.2,False
+800,Ohio,1995.0,111.7,155.6,False
+801,Ohio,1996.0,107.6,159.7,False
+802,Ohio,1997.0,108.6,166.8,False
+803,Ohio,1998.0,106.4,172.9,False
+804,Ohio,1999.0,104.0,193.2,False
+805,Ohio,2000.0,99.9,265.4,False
+806,Oklahoma,1970.0,108.4,38.4,True
+807,Oklahoma,1971.0,115.4,39.8,True
+808,Oklahoma,1972.0,121.7,39.8,True
+809,Oklahoma,1973.0,124.1,40.4,True
+810,Oklahoma,1974.0,130.5,41.0,True
+811,Oklahoma,1975.0,132.9,43.6,True
+812,Oklahoma,1976.0,138.6,46.4,True
+813,Oklahoma,1977.0,140.4,47.9,True
+814,Oklahoma,1978.0,143.6,53.1,True
+815,Oklahoma,1979.0,141.6,55.5,True
+816,Oklahoma,1980.0,141.6,62.9,True
+817,Oklahoma,1981.0,143.7,65.8,True
+818,Oklahoma,1982.0,147.0,71.7,True
+819,Oklahoma,1983.0,140.0,83.9,True
+820,Oklahoma,1984.0,128.1,93.3,True
+821,Oklahoma,1985.0,124.2,95.1,True
+822,Oklahoma,1986.0,119.9,104.6,True
+823,Oklahoma,1987.0,113.1,114.4,True
+824,Oklahoma,1988.0,103.6,122.6,False
+825,Oklahoma,1989.0,97.5,133.4,False
+826,Oklahoma,1990.0,88.4,146.1,False
+827,Oklahoma,1991.0,87.8,149.1,False
+828,Oklahoma,1992.0,86.3,170.6,False
+829,Oklahoma,1993.0,86.2,182.4,False
+830,Oklahoma,1994.0,104.8,163.4,False
+831,Oklahoma,1995.0,109.5,161.1,False
+832,Oklahoma,1996.0,110.8,162.7,False
+833,Oklahoma,1997.0,111.8,172.0,False
+834,Oklahoma,1998.0,112.2,183.6,False
+835,Oklahoma,1999.0,111.4,203.4,False
+836,Oklahoma,2000.0,108.9,272.6,False
+837,Pennsylvania,1970.0,107.3,38.4,True
+838,Pennsylvania,1971.0,106.3,44.7,True
+839,Pennsylvania,1972.0,109.0,44.7,True
+840,Pennsylvania,1973.0,110.7,44.9,True
+841,Pennsylvania,1974.0,114.2,46.6,True
+842,Pennsylvania,1975.0,114.6,49.8,True
+843,Pennsylvania,1976.0,118.8,52.3,True
+844,Pennsylvania,1977.0,120.1,53.3,True
+845,Pennsylvania,1978.0,122.3,57.4,True
+846,Pennsylvania,1979.0,122.6,60.6,True
+847,Pennsylvania,1980.0,124.0,61.3,True
+848,Pennsylvania,1981.0,125.2,64.8,True
+849,Pennsylvania,1982.0,123.3,69.8,True
+850,Pennsylvania,1983.0,125.3,81.7,True
+851,Pennsylvania,1984.0,115.3,97.7,True
+852,Pennsylvania,1985.0,115.8,100.1,True
+853,Pennsylvania,1986.0,113.9,104.9,True
+854,Pennsylvania,1987.0,110.6,110.0,True
+855,Pennsylvania,1988.0,107.6,112.3,False
+856,Pennsylvania,1989.0,107.1,122.8,False
+857,Pennsylvania,1990.0,101.3,133.7,False
+858,Pennsylvania,1991.0,102.5,144.1,False
+859,Pennsylvania,1992.0,96.2,176.2,False
+860,Pennsylvania,1993.0,94.7,183.8,False
+861,Pennsylvania,1994.0,95.4,158.1,False
+862,Pennsylvania,1995.0,95.4,161.7,False
+863,Pennsylvania,1996.0,93.3,169.4,False
+864,Pennsylvania,1997.0,92.9,176.5,False
+865,Pennsylvania,1998.0,92.1,190.9,False
+866,Pennsylvania,1999.0,91.1,205.0,False
+867,Pennsylvania,2000.0,87.9,280.1,False
+868,Rhode Island,1970.0,123.9,39.3,True
+869,Rhode Island,1971.0,123.2,40.2,True
+870,Rhode Island,1972.0,134.4,41.6,True
+871,Rhode Island,1973.0,142.0,40.6,True
+872,Rhode Island,1974.0,146.1,41.3,True
+873,Rhode Island,1975.0,154.7,44.3,True
+874,Rhode Island,1976.0,150.2,52.2,True
+875,Rhode Island,1977.0,148.8,52.3,True
+876,Rhode Island,1978.0,146.8,56.3,True
+877,Rhode Island,1979.0,145.8,58.7,True
+878,Rhode Island,1980.0,149.3,60.0,True
+879,Rhode Island,1981.0,151.2,64.5,True
+880,Rhode Island,1982.0,146.3,71.6,True
+881,Rhode Island,1983.0,135.8,84.0,True
+882,Rhode Island,1984.0,136.9,94.8,True
+883,Rhode Island,1985.0,133.4,100.3,True
+884,Rhode Island,1986.0,136.3,101.8,True
+885,Rhode Island,1987.0,124.4,113.5,True
+886,Rhode Island,1988.0,138.0,121.5,False
+887,Rhode Island,1989.0,120.8,134.8,False
+888,Rhode Island,1990.0,101.4,150.9,False
+889,Rhode Island,1991.0,103.6,170.3,False
+890,Rhode Island,1992.0,100.1,190.0,False
+891,Rhode Island,1993.0,94.1,197.9,False
+892,Rhode Island,1994.0,91.9,168.9,False
+893,Rhode Island,1995.0,90.8,209.6,False
+894,Rhode Island,1996.0,87.5,214.9,False
+895,Rhode Island,1997.0,90.0,217.0,False
+896,Rhode Island,1998.0,88.7,232.2,False
+897,Rhode Island,1999.0,86.9,251.7,False
+898,Rhode Island,2000.0,83.1,322.9,False
+899,South Carolina,1970.0,103.6,32.5,True
+900,South Carolina,1971.0,115.0,34.3,True
+901,South Carolina,1972.0,118.7,34.1,True
+902,South Carolina,1973.0,125.5,33.5,True
+903,South Carolina,1974.0,129.7,35.2,True
+904,South Carolina,1975.0,130.5,38.1,True
+905,South Carolina,1976.0,136.8,41.0,True
+906,South Carolina,1977.0,137.2,42.2,True
+907,South Carolina,1978.0,140.4,49.2,True
+908,South Carolina,1979.0,135.7,50.2,True
+909,South Carolina,1980.0,138.3,52.3,True
+910,South Carolina,1981.0,136.1,54.7,True
+911,South Carolina,1982.0,136.0,61.9,True
+912,South Carolina,1983.0,131.1,72.4,True
+913,South Carolina,1984.0,127.0,81.3,True
+914,South Carolina,1985.0,125.4,83.0,True
+915,South Carolina,1986.0,126.6,88.7,True
+916,South Carolina,1987.0,126.6,95.3,True
+917,South Carolina,1988.0,124.4,99.9,False
+918,South Carolina,1989.0,122.4,111.9,False
+919,South Carolina,1990.0,118.6,125.2,False
+920,South Carolina,1991.0,121.5,129.0,False
+921,South Carolina,1992.0,112.8,151.9,False
+922,South Carolina,1993.0,115.2,164.5,False
+923,South Carolina,1994.0,112.2,139.1,False
+924,South Carolina,1995.0,109.2,140.0,False
+925,South Carolina,1996.0,102.9,149.5,False
+926,South Carolina,1997.0,124.5,153.9,False
+927,South Carolina,1998.0,126.9,165.3,False
+928,South Carolina,1999.0,109.4,179.6,False
+929,South Carolina,2000.0,103.9,255.3,False
+930,South Dakota,1970.0,92.7,38.5,True
+931,South Dakota,1971.0,96.7,38.5,True
+932,South Dakota,1972.0,103.0,39.1,True
+933,South Dakota,1973.0,103.5,39.6,True
+934,South Dakota,1974.0,108.4,40.4,True
+935,South Dakota,1975.0,113.5,42.8,True
+936,South Dakota,1976.0,116.7,45.0,True
+937,South Dakota,1977.0,115.6,46.4,True
+938,South Dakota,1978.0,116.9,53.2,True
+939,South Dakota,1979.0,117.4,54.1,True
+940,South Dakota,1980.0,114.7,58.8,True
+941,South Dakota,1981.0,115.7,62.3,True
+942,South Dakota,1982.0,113.0,68.0,True
+943,South Dakota,1983.0,109.8,78.8,True
+944,South Dakota,1984.0,105.7,89.8,True
+945,South Dakota,1985.0,104.4,92.3,True
+946,South Dakota,1986.0,97.0,108.5,True
+947,South Dakota,1987.0,95.8,113.7,True
+948,South Dakota,1988.0,91.9,124.7,False
+949,South Dakota,1989.0,87.4,130.1,False
+950,South Dakota,1990.0,88.3,138.9,False
+951,South Dakota,1991.0,91.8,150.3,False
+952,South Dakota,1992.0,93.0,163.0,False
+953,South Dakota,1993.0,91.6,180.3,False
+954,South Dakota,1994.0,94.8,154.4,False
+955,South Dakota,1995.0,98.6,162.1,False
+956,South Dakota,1996.0,92.3,171.2,False
+957,South Dakota,1997.0,88.8,181.7,False
+958,South Dakota,1998.0,88.3,192.8,False
+959,South Dakota,1999.0,83.5,207.9,False
+960,South Dakota,2000.0,75.1,272.9,False
+961,Tennessee,1970.0,99.8,39.9,True
+962,Tennessee,1971.0,106.3,41.6,True
+963,Tennessee,1972.0,111.5,41.6,True
+964,Tennessee,1973.0,109.7,40.8,True
+965,Tennessee,1974.0,114.8,42.5,True
+966,Tennessee,1975.0,117.4,45.3,True
+967,Tennessee,1976.0,121.7,48.3,True
+968,Tennessee,1977.0,124.6,49.6,True
+969,Tennessee,1978.0,127.3,54.8,True
+970,Tennessee,1979.0,127.2,57.3,True
+971,Tennessee,1980.0,130.4,60.3,True
+972,Tennessee,1981.0,129.1,63.7,True
+973,Tennessee,1982.0,131.4,68.3,True
+974,Tennessee,1983.0,129.0,79.1,True
+975,Tennessee,1984.0,125.1,88.3,True
+976,Tennessee,1985.0,128.7,92.5,True
+977,Tennessee,1986.0,129.0,98.8,True
+978,Tennessee,1987.0,130.6,103.5,True
+979,Tennessee,1988.0,125.3,112.1,False
+980,Tennessee,1989.0,124.7,121.5,False
+981,Tennessee,1990.0,121.8,135.0,False
+982,Tennessee,1991.0,120.6,137.4,False
+983,Tennessee,1992.0,121.0,163.9,False
+984,Tennessee,1993.0,120.8,170.2,False
+985,Tennessee,1994.0,118.8,150.3,False
+986,Tennessee,1995.0,125.4,153.0,False
+987,Tennessee,1996.0,119.2,155.9,False
+988,Tennessee,1997.0,118.9,161.1,False
+989,Tennessee,1998.0,119.7,167.7,False
+990,Tennessee,1999.0,115.6,189.5,False
+991,Tennessee,2000.0,108.7,261.2,False
+992,Texas,1970.0,106.4,40.4,True
+993,Texas,1971.0,108.9,42.0,True
+994,Texas,1972.0,108.6,46.9,True
+995,Texas,1973.0,110.4,46.4,True
+996,Texas,1974.0,114.7,47.5,True
+997,Texas,1975.0,116.0,50.6,True
+998,Texas,1976.0,121.4,53.3,True
+999,Texas,1977.0,124.2,53.3,True
+1000,Texas,1978.0,126.6,59.1,True
+1001,Texas,1979.0,126.4,62.2,True
+1002,Texas,1980.0,129.7,63.7,True
+1003,Texas,1981.0,129.0,66.9,True
+1004,Texas,1982.0,131.2,73.8,True
+1005,Texas,1983.0,126.4,84.1,True
+1006,Texas,1984.0,117.2,93.8,True
+1007,Texas,1985.0,115.9,102.1,True
+1008,Texas,1986.0,113.7,105.5,True
+1009,Texas,1987.0,105.8,114.4,True
+1010,Texas,1988.0,96.5,128.0,False
+1011,Texas,1989.0,94.5,137.0,False
+1012,Texas,1990.0,85.6,145.7,False
+1013,Texas,1991.0,79.4,173.6,False
+1014,Texas,1992.0,77.2,186.0,False
+1015,Texas,1993.0,81.3,204.6,False
+1016,Texas,1994.0,78.8,177.7,False
+1017,Texas,1995.0,75.2,185.0,False
+1018,Texas,1996.0,74.6,188.4,False
+1019,Texas,1997.0,72.6,189.8,False
+1020,Texas,1998.0,73.2,201.8,False
+1021,Texas,1999.0,67.6,225.0,False
+1022,Texas,2000.0,69.3,292.3,False
+1023,Utah,1970.0,65.5,34.6,True
+1024,Utah,1971.0,67.7,36.6,True
+1025,Utah,1972.0,71.3,37.2,True
+1026,Utah,1973.0,72.7,36.5,True
+1027,Utah,1974.0,75.6,37.8,True
+1028,Utah,1975.0,75.8,40.5,True
+1029,Utah,1976.0,77.9,43.4,True
+1030,Utah,1977.0,78.0,44.7,True
+1031,Utah,1978.0,79.6,49.5,True
+1032,Utah,1979.0,79.1,53.7,True
+1033,Utah,1980.0,74.8,57.2,True
+1034,Utah,1981.0,77.6,62.7,True
+1035,Utah,1982.0,73.6,68.1,True
+1036,Utah,1983.0,69.0,82.0,True
+1037,Utah,1984.0,66.3,95.3,True
+1038,Utah,1985.0,66.5,104.6,True
+1039,Utah,1986.0,64.4,103.5,True
+1040,Utah,1987.0,67.7,108.6,True
+1041,Utah,1988.0,55.0,122.9,False
+1042,Utah,1989.0,57.0,135.6,False
+1043,Utah,1990.0,53.4,151.9,False
+1044,Utah,1991.0,53.5,167.1,False
+1045,Utah,1992.0,55.0,170.1,False
+1046,Utah,1993.0,56.2,180.1,False
+1047,Utah,1994.0,55.8,160.4,False
+1048,Utah,1995.0,52.0,168.8,False
+1049,Utah,1996.0,54.0,174.9,False
+1050,Utah,1997.0,57.0,186.2,False
+1051,Utah,1998.0,42.3,222.7,False
+1052,Utah,1999.0,43.9,243.7,False
+1053,Utah,2000.0,40.7,312.9,False
+1054,Vermont,1970.0,122.6,37.7,True
+1055,Vermont,1971.0,124.4,39.5,True
+1056,Vermont,1972.0,138.0,40.0,True
+1057,Vermont,1973.0,146.8,39.8,True
+1058,Vermont,1974.0,151.8,41.3,True
+1059,Vermont,1975.0,155.5,41.8,True
+1060,Vermont,1976.0,171.1,47.1,True
+1061,Vermont,1977.0,169.4,47.0,True
+1062,Vermont,1978.0,162.4,52.5,True
+1063,Vermont,1979.0,160.9,54.8,True
+1064,Vermont,1980.0,161.6,58.9,True
+1065,Vermont,1981.0,163.8,61.0,True
+1066,Vermont,1982.0,162.3,66.8,True
+1067,Vermont,1983.0,153.8,77.0,True
+1068,Vermont,1984.0,144.3,90.6,True
+1069,Vermont,1985.0,144.5,95.5,True
+1070,Vermont,1986.0,131.2,104.9,True
+1071,Vermont,1987.0,128.3,113.8,True
+1072,Vermont,1988.0,128.7,123.7,False
+1073,Vermont,1989.0,120.9,129.7,False
+1074,Vermont,1990.0,124.3,143.7,False
+1075,Vermont,1991.0,120.9,150.1,False
+1076,Vermont,1992.0,126.5,168.0,False
+1077,Vermont,1993.0,117.2,173.8,False
+1078,Vermont,1994.0,120.3,159.6,False
+1079,Vermont,1995.0,123.2,160.1,False
+1080,Vermont,1996.0,102.5,196.4,False
+1081,Vermont,1997.0,97.7,201.9,False
+1082,Vermont,1998.0,97.0,213.9,False
+1083,Vermont,1999.0,94.1,233.7,False
+1084,Vermont,2000.0,88.9,301.1,False
+1085,Virginia,1970.0,124.3,28.8,True
+1086,Virginia,1971.0,128.4,30.2,True
+1087,Virginia,1972.0,137.0,29.9,True
+1088,Virginia,1973.0,143.1,30.1,True
+1089,Virginia,1974.0,149.6,31.3,True
+1090,Virginia,1975.0,152.7,33.6,True
+1091,Virginia,1976.0,158.1,37.9,True
+1092,Virginia,1977.0,157.7,38.4,True
+1093,Virginia,1978.0,155.9,42.8,True
+1094,Virginia,1979.0,151.8,45.8,True
+1095,Virginia,1980.0,148.9,48.5,True
+1096,Virginia,1981.0,149.9,51.8,True
+1097,Virginia,1982.0,147.4,56.4,True
+1098,Virginia,1983.0,144.7,68.8,True
+1099,Virginia,1984.0,136.8,76.0,True
+1100,Virginia,1985.0,134.6,83.6,True
+1101,Virginia,1986.0,135.8,91.3,True
+1102,Virginia,1987.0,133.0,94.6,True
+1103,Virginia,1988.0,129.5,102.1,False
+1104,Virginia,1989.0,122.5,109.4,False
+1105,Virginia,1990.0,118.9,128.6,False
+1106,Virginia,1991.0,109.1,136.5,False
+1107,Virginia,1992.0,108.2,157.9,False
+1108,Virginia,1993.0,105.4,165.7,False
+1109,Virginia,1994.0,106.2,156.5,False
+1110,Virginia,1995.0,106.7,157.5,False
+1111,Virginia,1996.0,104.6,159.6,False
+1112,Virginia,1997.0,108.0,159.6,False
+1113,Virginia,1998.0,105.6,162.2,False
+1114,Virginia,1999.0,102.1,183.7,False
+1115,Virginia,2000.0,96.7,252.8,False
+1116,West Virginia,1970.0,114.5,33.7,True
+1117,West Virginia,1971.0,111.5,41.6,True
+1118,West Virginia,1972.0,117.5,41.3,True
+1119,West Virginia,1973.0,116.6,39.9,True
+1120,West Virginia,1974.0,119.9,42.0,True
+1121,West Virginia,1975.0,123.2,45.2,True
+1122,West Virginia,1976.0,129.7,48.4,True
+1123,West Virginia,1977.0,133.9,48.9,True
+1124,West Virginia,1978.0,131.6,53.9,True
+1125,West Virginia,1979.0,122.1,62.4,True
+1126,West Virginia,1980.0,122.3,64.3,True
+1127,West Virginia,1981.0,120.5,66.2,True
+1128,West Virginia,1982.0,119.8,75.1,True
+1129,West Virginia,1983.0,115.7,88.2,True
+1130,West Virginia,1984.0,111.9,97.2,True
+1131,West Virginia,1985.0,109.1,103.2,True
+1132,West Virginia,1986.0,112.1,104.1,True
+1133,West Virginia,1987.0,107.5,112.8,True
+1134,West Virginia,1988.0,109.1,122.2,False
+1135,West Virginia,1989.0,104.0,131.2,False
+1136,West Virginia,1990.0,104.1,142.9,False
+1137,West Virginia,1991.0,100.1,144.1,False
+1138,West Virginia,1992.0,97.9,158.2,False
+1139,West Virginia,1993.0,111.0,166.2,False
+1140,West Virginia,1994.0,104.2,150.1,False
+1141,West Virginia,1995.0,115.2,156.8,False
+1142,West Virginia,1996.0,112.7,157.3,False
+1143,West Virginia,1997.0,114.5,160.9,False
+1144,West Virginia,1998.0,114.6,171.1,False
+1145,West Virginia,1999.0,112.4,192.4,False
+1146,West Virginia,2000.0,107.9,253.7,False
+1147,Wisconsin,1970.0,106.4,38.5,True
+1148,Wisconsin,1971.0,105.4,40.2,True
+1149,Wisconsin,1972.0,108.8,40.3,True
+1150,Wisconsin,1973.0,109.5,42.6,True
+1151,Wisconsin,1974.0,111.8,43.9,True
+1152,Wisconsin,1975.0,113.5,46.6,True
+1153,Wisconsin,1976.0,115.4,51.3,True
+1154,Wisconsin,1977.0,117.2,52.1,True
+1155,Wisconsin,1978.0,116.7,57.1,True
+1156,Wisconsin,1979.0,117.1,58.7,True
+1157,Wisconsin,1980.0,117.6,61.2,True
+1158,Wisconsin,1981.0,119.9,64.9,True
+1159,Wisconsin,1982.0,115.6,75.0,True
+1160,Wisconsin,1983.0,106.3,92.0,True
+1161,Wisconsin,1984.0,105.6,100.8,True
+1162,Wisconsin,1985.0,107.0,106.8,True
+1163,Wisconsin,1986.0,105.4,110.8,True
+1164,Wisconsin,1987.0,106.0,116.3,True
+1165,Wisconsin,1988.0,102.6,128.6,False
+1166,Wisconsin,1989.0,100.3,138.3,False
+1167,Wisconsin,1990.0,94.0,151.1,False
+1168,Wisconsin,1991.0,95.5,158.6,False
+1169,Wisconsin,1992.0,96.2,176.5,False
+1170,Wisconsin,1993.0,91.2,195.5,False
+1171,Wisconsin,1994.0,91.8,178.6,False
+1172,Wisconsin,1995.0,93.5,188.0,False
+1173,Wisconsin,1996.0,92.1,200.5,False
+1174,Wisconsin,1997.0,91.9,200.7,False
+1175,Wisconsin,1998.0,88.7,210.8,False
+1176,Wisconsin,1999.0,84.4,243.5,False
+1177,Wisconsin,2000.0,80.1,312.8,False
+1178,Wyoming,1970.0,132.2,34.1,True
+1179,Wyoming,1971.0,131.7,34.4,True
+1180,Wyoming,1972.0,140.0,34.4,True
+1181,Wyoming,1973.0,141.2,34.4,True
+1182,Wyoming,1974.0,145.8,35.8,True
+1183,Wyoming,1975.0,160.7,38.6,True
+1184,Wyoming,1976.0,161.5,42.6,True
+1185,Wyoming,1977.0,160.4,43.4,True
+1186,Wyoming,1978.0,160.3,49.8,True
+1187,Wyoming,1979.0,168.6,51.7,True
+1188,Wyoming,1980.0,158.1,55.3,True
+1189,Wyoming,1981.0,163.1,55.9,True
+1190,Wyoming,1982.0,157.7,64.3,True
+1191,Wyoming,1983.0,141.2,71.0,True
+1192,Wyoming,1984.0,128.9,81.7,True
+1193,Wyoming,1985.0,125.7,87.4,True
+1194,Wyoming,1986.0,124.8,97.8,True
+1195,Wyoming,1987.0,110.4,102.7,True
+1196,Wyoming,1988.0,114.3,112.9,False
+1197,Wyoming,1989.0,111.4,118.6,False
+1198,Wyoming,1990.0,96.9,129.5,False
+1199,Wyoming,1991.0,109.1,136.0,False
+1200,Wyoming,1992.0,110.8,155.1,False
+1201,Wyoming,1993.0,108.4,166.9,False
+1202,Wyoming,1994.0,111.2,147.4,False
+1203,Wyoming,1995.0,115.0,153.0,False
+1204,Wyoming,1996.0,110.3,162.5,False
+1205,Wyoming,1997.0,108.8,164.1,False
+1206,Wyoming,1998.0,102.9,168.8,False
+1207,Wyoming,1999.0,104.8,189.6,False
+1208,Wyoming,2000.0,90.5,267.1,False
