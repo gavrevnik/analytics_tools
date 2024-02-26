@@ -38,7 +38,7 @@ nbdime config-git --enable --global
 
 ## alternative way to work with jpnb: https://www.youtube.com/watch?v=BEMP4xacrVc
 pip install nbstripout nbconvert
-nbstripout --install
+# nbstripout --install # это уже в конкретном гите
 
 # ssh-add ~/.ssh/rsa; # rsa for servers
 
