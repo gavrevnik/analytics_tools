@@ -1,19 +1,300 @@
-import datetime, numpy as np, pandas as pd
-import scipy.stats as st, sklearn
+import warnings
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from scipy import stats
+from sklearn.ensemble import HistGradientBoostingRegressor, ExtraTreesRegressor
+from sklearn.linear_model import LogisticRegression, LinearRegression, Lasso
 import matplotlib.pyplot as plt
 import matplotlib
-import traceback
-import imp
-import string
-from hashlib import sha256
-import math
-from statsmodels.stats.weightstats import ztest, ttest_ind
-from scipy import stats
-from scipy.stats import ttest_ind as ttest_ind_from_scipy
-import seaborn as sns
+import statsmodels.formula.api as smf
+from causalinference import CausalModel
+from scipy.stats import chisquare
+from statsmodels.stats.multitest import multipletests
 from statsmodels.stats.power import tt_ind_solve_power
 
-def init_matplot(figsize_xy=(15,5), subplot_grid=None):
+####### СТАТИСТИЧЕСКИЕ ТЕСТЫ
+# poisson boot
+def fraq_to_list(num, denum):
+    """преобразуем дробь num/denum в массив 0 0 0 1 ... для расчетов в стат тестах"""
+    return np.append(np.repeat(1, num), np.repeat(0, denum - num))
+
+def get_normal_list(mu, std, size):
+    """Получение нормально распределенной метрики - для эмуляций; size = None -> return val else return list"""
+    return np.random.normal(mu, std, size)
+
+def ttest_calc(metric_1, metric_2 = None, alpha = 0.05):
+    """Применение T-распределения для оценки дов интервалов и гипотез о равенстве средних
+    Условия применимости: средневыборочное метрик распределено нормально (нужно проверить отдельно - см Валидация)
+    p_value >= alpha -> approve H0 else reject.
+    metric_1, 2 = списки; alpha = ошибка первого рода
+    return: conf_int_avg_diff, p_value
+    """
+    # оценки по одной величине (например, подходит для оценки конверсии в массиве 0 0 0 1 ...)
+    if metric_2 is None:
+        avg_ = np.mean(metric_1)
+        len_ = len(metric_1)
+        var_ = np.std(metric_1) ** 2 / len_
+        se = np.sqrt(var_)
+        z = stats.t.ppf(1 - alpha / 2, df=(len_ - 1))
+        p_val = 2 * (1 - stats.t.cdf(np.abs(avg_ / se), df=(len_ - 1)))
+        confint = avg_ + np.array([-1, 1]) * z * se
+    # оценки для сравнения средних двух метрик
+    else:
+        mean_1, mean_2 = np.mean(metric_1), np.mean(metric_2)
+        var = np.std(metric_1) ** 2 / len(metric_1) + np.std(metric_2) ** 2 / len(metric_2)
+        se = np.sqrt(var)
+        df = len(metric_1) + len(metric_2) - 2
+        z = stats.t.ppf(1 - alpha / 2, df=df)
+        confint = (mean_2 - mean_1) + np.array([-1, 1]) * z * se
+        p_val = 2 * (1 - stats.t.cdf(np.abs((mean_2 - mean_1) / se), df=df))
+    return confint, p_val
+
+def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4, alpha = 0.05):
+    """Использование семплирования для оценки разницы статистик stat_func(X) на двух или одной метрике
+    test_func -> это может быть среднее, медиана или др статистики
+    для очень малых len(metric)<100-200 нужны поправки на смещение - здесь не учитываем
+    return confint_test_stat_diff, p_value
+    """
+    boot_list = [] # sampling
+    if metric_2 is None:
+        for _ in range(iter):
+            stat_ = stat_func(np.random.choice(metric_1, len(metric_1), replace = True))
+            boot_list.append(stat_)
+    else:
+        for _ in range(iter):
+            stat_ = stat_func(np.random.choice(metric_2, len(metric_2), replace = True)) - stat_func(np.random.choice(metric_1, len(metric_1), replace = True))
+            boot_list.append(stat_)
+    confint = np.percentile(boot_list, 100 * (alpha / 2)), np.percentile(boot_list, 100 * (1 - alpha / 2))
+    # p val calc
+    q_ = stats.norm.cdf(x=0, loc=np.mean(boot_list), scale=np.std(boot_list, ddof=1))
+    p_val = q_ * 2 if 0 < np.mean(boot_list) else (1 - q_) * 2
+    return confint, p_val
+
+def ttest_stratification_calc(df_con, df_test, weights, alpha = 0.05):
+    """"Стратифицированный T-test для двух выборок
+    df_con/test = Y, S = целевая метрика, значение страты
+    например Y = выручка, S = название региона;
+    weights = удельный вес каждой страты на исторических данных df_prev
+    weights = df_prev.S.value_counts(normalize=True)
+    return: confint, p_val
+    """
+    con_size = len(df_con.Y)
+    test_size = len(df_test.Y)
+    con_avg = (df_con.groupby('S')['Y'].mean() * weights).sum()
+    test_avg = (df_test.groupby('S')['Y'].mean() * weights).sum()
+    con_var = ((df_con.groupby('S')['Y'].var()) * weights).sum()
+    test_var = ((df_test.groupby('S')['Y'].var()) * weights).sum()
+    # test calc
+    delta_avg = test_avg - con_avg
+    se = np.sqrt((con_var / con_size + test_var / test_size))
+    z = stats.t.ppf(1 - alpha / 2, df=(con_size + test_size - 2))
+    p_val = 2 * (1 - stats.t.cdf(np.abs(delta_avg / se), df=(con_size + test_size - 2)))
+    confint = delta_avg + np.array([-1, 1]) * z * se
+    return confint, p_val
+
+def multitest_calc(p_value_list, alpha = 0.05, alpha_type = 'fwer'):
+    """Корректировка p_values по группе парных ab тестов с различным контролем ошибки
+    https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html
+    p_value_list = список p_value всех проверяемых гипотез (например, список результатов всех T-тестов для N сравнений)
+    alpha = уровень контроля значимости fdr, fwer в зависимости от alpha_type
+    alpha_type = fdr, fwer (выбраны оптимальные критерии для каждого из типов контроля)
+    FWER = family wise error rate = контроль ошибки "хотя бы один ложный прокрас из всех тестов". Строгое условие
+    FDR = false discovery rate = контроль доли ложных прокрасов среди прокрасов - мягкое условие (для поиска положительных инсайтов)
+    return: список решений по тестам на уровне alpha; p_val_corrected; alpha_adj - уменьшенное на множественную поправку
+    """
+    # holm = аналог Бонферрони, но мощнее; fdr_bh = Benjamini/Hochberg оптимален для контроля FDR
+    decision_list, p_val_corrected, alpha_adj, _ = multipletests(p_value_list, alpha = 0.05, method=alpha_type.replace('fwer','holm').replace('fdr', 'fdr_bh'))
+    return decision_list, p_val_corrected, alpha_adj
+
+
+####### ТОЧНОСТЬ И КОРРЕКТНОСТЬ КРИТЕРИЕВ
+# power calc
+
+def get_mde_detail(control, n_branch = 2, ratio = 1, alpha = 0.05, power = 0.8):
+    """
+    ratio = len(control) / len(exp) - изменяется когда например катим ассиметричные тесты 70% теста итд
+    n_branch - если запускается несколько веток - учитывается поправка Бонферрони (n_branch кол во веток УЧИТЫВАЯ контроль)
+    return mde info; mde - минимально детектируемый эффект с заданными ошибками первого и второго рода
+    """
+    comparison = n_branch * (n_branch - 1) / 2
+    N_c = len(control)
+    control_mean, control_std = np.mean(control), np.std(control)
+    delta = control_std * tt_ind_solve_power(nobs1 = N_c, alpha= alpha / comparison, power = power, ratio = ratio, alternative='two-sided')
+    return f"""Участников в контроле {len(control)}, среднее: {round(control_mean, 2)}, mde_abs = {round(delta, 3)}; mde_rel = {round(100 * delta / control_mean, 1)}%"""
+
+def get_halfconfw(control, alpha = 0.05):
+    """Ширина доверительного интервала (полеззно дополняет MDE)"""
+    return stats.t.ppf(1 - alpha / 2, df=(len(control) - 1)) * np.std(control, ddof=1) / np.sqrt(len(control))
+
+def check_branch_balance(f_real, f_exp = None):
+    """Проверка соответствия реальных частот f_real (напр, кол-во участников в ветках экспа [105, 115])
+    ожидаемым математически частотам [100, 100]
+    Если f_exp = None, считаем ожидаемое распр. равномерным f_exp = sum(f_obs)/len(f_obs))
+    """
+    _, p_value = chisquare(f_real, f_exp)
+    text = 'branch sizes valid'
+    if p_value < 0.05:
+        text = 'branch sizes invalid'
+    return text + f' p_val = {round(p_value, 4)}'
+
+def validation_ttest(X, backets_cnt = 10, aa_test_cnt = 10**4, alpha = 0.05):
+    """
+    Проводим валидацию метрики X, через семплирование АА-тестами. Алгоритм:
+    1) метрика X разбивается на backets_cnt одинаковых частей (четное!)
+    2) получаем попарные backets_cnt/2 АА-тестов -> вычисляем p_val
+    3) перемешиваем метрику и так повторяем далее, пока не наберем iter_cnt тестов
+    оцениваем FPR (долю ложных прокрасов); дополнительно семплируем средневыборочное X, проверяем его на нормальность
+    PS. backets_cnt рекомендуется выбирать из условия len(X)/backets_cnt ~ real_control
+    """
+    if backets_cnt % 2 > 0:
+        return 'выберите четное число backets_cnt'
+    iter = int(2 * aa_test_cnt / backets_cnt)
+    p_val_list = []
+    for _ in range(iter):
+        np.random.shuffle(X) # inplace
+        aa_test_list = np.array_split(X, backets_cnt) # попарные АА тесты
+        for j in [i for i in range(0, backets_cnt - 1) if i % 2 == 0]:
+            p_val = stats.ttest_ind(aa_test_list[j], aa_test_list[j+1])[1]
+            p_val_list.append(p_val)
+    # оцениваем FPR
+    fpr_list = [1 if j <= alpha else 0 for j in p_val_list]
+    fpr, _ = ttest_calc(fraq_to_list(sum(fpr_list), len(fpr_list))) # дов интервалы для ошибки 1-го рода
+    # семплируем средневыборочное; оцениваем нормальность
+    avg_list = []
+    for _ in range(iter):
+        avg_ = np.mean(np.random.choice(X, int(len(X) / backets_cnt), replace=False))
+        avg_list.append(avg_)
+    _, p_value = stats.shapiro(avg_list)
+    decision = ['INVALID' if p_value <= alpha else 'VALID'][0]
+    ans = f"""
+    Кол-во АА-тестов {len(p_val_list)}; Backets_cnt = {backets_cnt};
+    AA_control_size ~ {int(len(X)/backets_cnt)}; AA_control_avg ~ {round(np.mean(X), 5)}
+    AA_FPR = {np.round(100 * fpr, 3)}%
+    Нормальность средневыборочн. {decision}, p_val_shapiro ~ {round(p_value, 6)}"""
+    # при необходимости можно визуализировать списки через get_visualisation
+    return ans, p_val_list, avg_list
+
+
+####### ПОВЫШЕНИЕ ЧУВСТВИТЕЛЬНОСТИ
+def cuped_calc(df, x = ['Y_prev'], y = 'Y', T = 'exp_group', method = 'ols', df_prev = None):
+    """
+    CUPED =  Controlled-experiment Using Pre-Experiment Data (при использовании ML -> расширение до CUPAC)
+    df - целевой экспериментальный датасет; y - целевая переменная; T - индикатор тестовой группы control/experiment или 0/1
+    x - список уточняющих ковариат = ['x1', 'x2' ...]
+    method - модель обучения = ols (лин регрессия), hgb (HistGradientBoostingRegressor), etr (ExtraTreesRegressor)
+    df_prev - исторические данные; если заданы - то обучение идет на них, иначе - на контроле
+    return: Y_adj - скорректированная целевая метрика; avg(Y) = avg(Y_adj); std(Y_adj) < std(Y)
+    """
+    df[T] = df[T].replace({'control' : 0, 'experiment' : 1}) # дополнительная подготовка
+    # 1. model fit
+    if df_prev is None:
+        tmp_fit = df[df[T] == 0]         # обучаем модель на контрольных данных
+    else:
+        tmp_fit = df_prev # берем исторические данные для обучения
+    if method == 'ols':
+        model = smf.ols(f'{y} ~ ' + ' + '.join(x), data=tmp_fit).fit()
+    elif method == 'hgb':
+        Y_ = tmp_fit[y].values
+        X_ = tmp_fit[x].values
+        model = HistGradientBoostingRegressor().fit(X_, Y_)
+    elif method == 'etr':
+        print('высокий риск переобучения на контроле! использовать на df_prev')
+        Y_ = tmp_fit[y].values
+        X_ = tmp_fit[x].values
+        model = ExtraTreesRegressor().fit(X_, Y_)
+    # 2. моделируем Y_forecast по ковариатам для коррекции целевой метрики
+    X_ = df[x]; Y_forecast  = model.predict(X_)
+    # контроль переобучения - полученный прогноз должен быть независим от T во избежание смещения оценки
+    print(f'correlation Treatment - Y_forecast {np.corrcoef(df[T].values, Y_forecast)[0][1]}')
+    # 3. create Y_adj: Y ~ Y_forecast -> Y_adj
+    Y = df[y].values; Y_adj = Y - (Y_forecast - np.mean(Y_forecast))
+    return Y_adj
+
+
+####### ПРЕОБРАЗОВАНИЯ МЕТРИК
+# бакетный анализ
+
+def linearisation_taylor(metric_num, metric_denum):
+    """
+    Линеаризация Ratio-метрики типа R = metric_num / metric_denum -> linear_metric
+    Возможно разными способами:
+    - дельта-метод (более простой в вычислении, менее точный)
+    - тейлор (разложение метрики по производным, точнее но дольше)
+    здесь мы применяем линеаризацию с помощью тейлора
+    https://habr.com/ru/company/avito/blog/454164/
+    """
+    mx, my = np.mean(metric_num), np.mean(metric_denum)
+    return mx / my + (1 / my) * (metric_num - metric_denum * (mx / my))
+
+def outlier_fix(metric, thr = 99, thr_type = 'ptl', fix_type = 'd'):
+    """
+    Обработка метрики от имеющихся в ней выбросов
+    thr_type = ptl (percentile), val (real_val) = отсечение по процентам или реальному порогу
+    fix_type = d (drop), w (winsor) = убираем выбросы, заменяем на максимально допустимые (винсоризация)
+    """
+    metric = np.array(metric)
+    if thr_type == 'ptl':
+        thr = np.percentile(metric, thr)
+    thr_real = max(metric[metric <= thr])
+    if fix_type == 'd':
+        res = metric[metric <= thr_real]
+    elif fix_type == 'w':
+        res = np.array([j if j <= thr_real else thr_real for j in metric])
+    return res
+
+####### ЛИНЕЙНАЯ РЕГРЕССИЯ
+def ols_calc(df, y = 'Y', x = ['X'], weight = None, regul_alpha = None, regul_type = 'L1'):
+    """
+    OLS = ordinary least square
+    df = датасет с целевой метрикой Y и ковариатами x = ['x1', 'x2', ...]
+    regul_alpha; regul_type = L1/L2 = параметры для регуляризации
+    L1: штраф за высокие |k1|+|k2|+...; L2: за k1**2 + k2**2 + ...
+    PS. регуляризация усложняет оценку дов интевалов -> их можно считать только с bootstrap
+    weight = колонка весов для каждого наблюдения - применяется только в OLS без регуляризации
+    return: info = датасет с информацией по регрессии, model = обученная модель для predict
+    """
+    if regul_alpha is not None:
+        # регуляризация; регрессия методами sklearn
+        if regul_type == 'L1':
+            model = Lasso(alpha = regul_alpha)
+            model.fit(df[x], df[y])
+            info = pd.DataFrame({'feature' : model.feature_names_in_,
+                                 'coef' : model.coef_})
+            info['R^2'] = r2_score(df[y], model.predict(df[x]))
+            info['regul_type'] = regul_type
+            info['regul_alpha'] = regul_alpha
+
+        elif regul_type == 'L2':
+            model = Ridge(alpha = regul_alpha)
+            model.fit(df[x], df[y])
+            info = pd.DataFrame({'feature' : model.feature_names_in_,
+                                 'coef' : model.coef_})
+            info['R^2'] = r2_score(df[y], model.predict(df[x]))
+            info['regul_type'] = regul_type
+            info['regul_alpha'] = regul_alpha
+    else:
+        # регрессия через statsmodel (больше доп инфы)
+        smf_formula = f'{y} ~ ' + ' + '.join(x)
+        if weight is None:
+            model = smf.ols(smf_formula, data = df).fit()
+        else:
+            weights = df['weight'].values
+            model = smf.wls(smf_formula, data = df, weights = weights).fit()
+        info = pd.DataFrame(model.summary().tables[1])
+        new_columns = info.iloc[0]
+        info.columns = [str(j) for j in new_columns]
+        info = info[1:].reset_index(drop=True).rename(columns={'' : 'feature',
+                                                             '[0.025' : 'conf_int1',
+                                                             '0.975]' : 'conf_int2',
+                                                             'P>|t|' : 'pval',
+                                                             'std err' : 'std_'})
+        info['R^2'] = model.rsquared
+    # финальный результат - dataframe + fit model
+    return info, model
+
+####### ВИЗУАЛИЗАЦИЯ
+def init_matplot(figsize_xy=(15, 5), subplot_grid=None):
     """Преднастройка отображения графиков в plt"""
     matplotlib.rcParams['figure.figsize'] = figsize_xy
     matplotlib.rcParams['figure.titlesize'] = 15
@@ -30,13 +311,68 @@ def init_matplot(figsize_xy=(15,5), subplot_grid=None):
         m, n = subplot_grid
         return plt.subplots(m, n)
 
-def mean_ttest(list_1, list_2, significance = 0.05):
-    """в пределе T-распределение сходится к Z-распредлению"""
-    T, p_value, _ = ttest_ind(list_2, list_1, alternative='larger', usevar='unequal')
-    if p_value <= significance / 2:
-        decision = 'M(list_2) > M(list_1)'
-    elif p_value >= 1 - significance / 2:
-        decision = 'M(list_2) < M(list_1)'
-    else:
-        decision = 'M(list_2) ~ M(list_1)'
-    return p_value, np.mean(list_2) - np.mean(list_1), decision
+def get_percentile_curve(val_list, per_start = 0, per_end = 100, per_step = 5, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
+    """
+    Перцентильная кривая = аналог гистограммы
+    Берем метрику val_list и строим график вида: какой процент семплов (ось X) меньше значения Y
+    """
+    per_range = list(range(per_start, per_end + per_step, per_step))
+    per_list = np.percentile(val_list, per_range)
+    plt.figure(figsize=figsize)
+    plt.plot(per_range, per_list)
+    plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.xticks(per_range); plt.show()
+
+
+def histogram_visualise(X, bins = 50, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
+    """Удобная визуализация для гистограммы с надписями"""
+    plt.figure(figsize=figsize)
+    plt.hist(X, bins=bins, edgecolor='black')
+    plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.show()
+
+
+####### CAUSAL INFERENCE METHODS
+def psm(df, X, T='treatment', Y='y'):
+    """
+    Propensity Score Matching
+    df = массив с данными; Y = целевая метрика; X = ковариаты; T = сплит переменная в формате 0;1
+    causalmodel используем для поиска через KNeighborsRegressor ближайшего соседа по ps
+    также идет bias_adj неидеального матчинга с помощью линейной регрессии
+    return ATE - эффект от эксперимента на целевую метрику Y
+    """
+    # ps = propensity score = вероятность принадлежать классу test (1)
+    df['ps'] = LogisticRegression(C=1e6).fit(df[X], df[T]).predict_proba(df[X])[:, 1]
+    # матчинг, используя kNN на переменной ps - для каждого контрольного семпла ищем самый ближний по ps из теста
+    cm = CausalModel(
+            Y=df[Y].values,
+            D=df[T].values,
+            X=df.ps.values
+        )
+    cm.est_via_matching(matches=1, bias_adj=True)
+    # выводит average treatment effect после матчинга
+    return cm.estimates['matching']['ate']
+
+def iptw(df, X, T='treatment', Y='y'):
+    """
+    Аналогичная PSM оценка на сбалансированной через IPTW метод
+    Здесь мы взвешиваем семплы (weights) в зависимости от их "экзотичности" - тем самым выправляя баланс выборок
+    return: ATE - эффект от эксперимента на целевую метрику Y; дов интервалы можно оценивать через bootstrap
+    [iptw(df.sample(frac=1, replace=True), X) for j in range(iter)]
+    """
+    df['ps'] = LogisticRegression(C=1e6).fit(df[X], df[T]).predict_proba(df[X])[:, 1]
+    # IPTW calc
+    weight = ((df.treatment - df.ps) / (df.ps * (1 - df.ps)))
+    return np.mean(weight * df.y)
+
+def cohen_d(d1, d2):
+    """
+    Нормированное на дисперсию расстояние между средними ковариаты
+    для двух выборок 1 и 2. Используем для проверки сбалансированности
+    выборок по ковариатам после матчинга.
+    cohen<10% можно считать нормально сбалансированной
+    """
+    # d1,2 - проверяемая ковариата для 1 и 2 групп
+    n1, n2 = len(d1), len(d2)
+    s1, s2 = np.var(d1, ddof=1), np.var(d2, ddof=1)
+    s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+    u1, u2 = np.mean(d1), np.mean(d2)
+    return round(100 * (u1 - u2) / s, 2)
