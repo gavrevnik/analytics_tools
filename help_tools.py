@@ -1,10 +1,9 @@
-import warnings
 import pandas as pd
 import numpy as np
-import seaborn as sns
 from scipy import stats
+from sklearn.metrics import r2_score
 from sklearn.ensemble import HistGradientBoostingRegressor, ExtraTreesRegressor
-from sklearn.linear_model import LogisticRegression, LinearRegression, Lasso
+from sklearn.linear_model import LogisticRegression, Lasso, Ridge
 import matplotlib.pyplot as plt
 import matplotlib
 import statsmodels.formula.api as smf
@@ -14,7 +13,6 @@ from statsmodels.stats.multitest import multipletests
 from statsmodels.stats.power import tt_ind_solve_power
 
 ####### СТАТИСТИЧЕСКИЕ ТЕСТЫ
-# poisson boot
 def fraq_to_list(num, denum):
     """преобразуем дробь num/denum в массив 0 0 0 1 ... для расчетов в стат тестах"""
     return np.append(np.repeat(1, num), np.repeat(0, denum - num))
@@ -71,6 +69,23 @@ def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4,
     p_val = q_ * 2 if 0 < np.mean(boot_list) else (1 - q_) * 2
     return confint, p_val
 
+def bootstrap_poisson_calc(metric_1, mertic_2, n_iter = 10**4, X1 = None, X2 = None, alpha = 0.05):
+    """Оцениваем разницу средних взвешивая на базе распределения Пуассона
+    Работает корректно для больших выборок len(metric)>10**3
+    Веса X1,2 ~ Poisson(1) могут быть сгенерированы и записаны в память заранее
+    Если их нет, то генерируются внутри функции
+    """
+    # считаем заранее либо в моменте
+    if X1 is None:
+        X1 = np.random.poisson(lam=1, size=(n_iter, len(metric_1)))
+        X2 = np.random.poisson(lam=1, size=(n_iter, len(metric_2)))
+    # матричный расчет списка средних
+    mu1 = np.dot(X1, metric_1) / X1.sum(axis=1)
+    mu2 = np.dot(X2, metric_2) / X2.sum(axis=1)
+    boot_list = mu2 - mu1
+    # возвращаем дов интервалы для разницы средних
+    return np.percentile(boot_list, [100 * alpha/2, 100 - alpha/2])
+
 def ttest_stratification_calc(df_con, df_test, weights, alpha = 0.05):
     """"Стратифицированный T-test для двух выборок
     df_con/test = Y, S = целевая метрика, значение страты
@@ -109,8 +124,6 @@ def multitest_calc(p_value_list, alpha = 0.05, alpha_type = 'fwer'):
 
 
 ####### ТОЧНОСТЬ И КОРРЕКТНОСТЬ КРИТЕРИЕВ
-# power calc
-
 def get_mde_detail(control, n_branch = 2, ratio = 1, alpha = 0.05, power = 0.8):
     """
     ratio = len(control) / len(exp) - изменяется когда например катим ассиметричные тесты 70% теста итд
@@ -175,6 +188,29 @@ def validation_ttest(X, backets_cnt = 10, aa_test_cnt = 10**4, alpha = 0.05):
     # при необходимости можно визуализировать списки через get_visualisation
     return ans, p_val_list, avg_list
 
+def stat_test_errors_estimate(metric_hist = None, stat_test = None, sample_size = 10**3, effect=0, iter=10**2, alpha = 0.05):
+    """
+    https://habr.com/ru/companies/X5Tech/articles/706388/
+    Оценка мощности и FPR критерия на выбранном распределении metric_hist - может быть сэмулировано, либо взято из истории
+    stat_test = стат критерий возвращающий объект с атрибутом pvalue
+    sample_size = размер генерируемых выборок (должен быть примерно как в ожидаемом ab)
+    effect = ожидаемый детектируемый эффект для данных выборок
+    Семплируем пары тестов из начального распределения
+    """
+    if metric_hist is None: # если не указано - эмулируем сами тестовое
+            metric_hist = np.random.normal(1, 1, 10**4)
+    if stat_test is None:
+        stat_test = stats.ttest_ind
+    pvalues_aa, pvalues_ab = [], []
+    for _ in range(iter):
+        a1, a2 = np.random.choice(metric_hist, size=(2, sample_size), replace=False)
+        b = a2 + effect
+        pvalues_aa.append(stat_test(a1, a2).pvalue)
+        pvalues_ab.append(stat_test(a1, b).pvalue)
+    ch1, ch2 = (np.array(pvalues_aa) < alpha).astype(int), (np.array(pvalues_ab) >= alpha).astype(int)
+    first_type_error, second_type_error = ttest_calc(ch1)[0], ttest_calc(ch2)[0]
+    return first_type_error, second_type_error
+
 
 ####### ПОВЫШЕНИЕ ЧУВСТВИТЕЛЬНОСТИ
 def cuped_calc(df, x = ['Y_prev'], y = 'Y', T = 'exp_group', method = 'ols', df_prev = None):
@@ -214,14 +250,15 @@ def cuped_calc(df, x = ['Y_prev'], y = 'Y', T = 'exp_group', method = 'ols', df_
 
 ####### ПРЕОБРАЗОВАНИЯ МЕТРИК
 # бакетный анализ
-
-def linearisation_taylor(metric_num, metric_denum):
+def ratio_linearisation(metric_num, metric_denum):
     """
-    Линеаризация Ratio-метрики типа R = metric_num / metric_denum -> linear_metric
+    Линеаризация Ratio-метрики типа R = metric_num / metric_denum -> linear_user_metric
     Возможно разными способами:
-    - дельта-метод (более простой в вычислении, менее точный)
-    - тейлор (разложение метрики по производным, точнее но дольше)
-    здесь мы применяем линеаризацию с помощью тейлора
+    - дельта-метод (более простой в вычислении, менее точный; нет поюзерной метрики)
+    - линеаризация (разложение метрики до первого члена, быстрее но менее точно)
+    - тейлор-2 (разложение метрики по производным до второго члена, точнее но дольше)
+    здесь мы применяем линеаризацию с помощью разложения тейлора до первого порядка
+    X/Y ~ mx/my + 1/my * (X - mx) - mx/my**2 * (Y - my) = mx/my + 1/my(X - Y*mx/my)
     https://habr.com/ru/company/avito/blog/454164/
     """
     mx, my = np.mean(metric_num), np.mean(metric_denum)
@@ -244,10 +281,11 @@ def outlier_fix(metric, thr = 99, thr_type = 'ptl', fix_type = 'd'):
     return res
 
 ####### ЛИНЕЙНАЯ РЕГРЕССИЯ
-def ols_calc(df, y = 'Y', x = ['X'], weight = None, regul_alpha = None, regul_type = 'L1'):
+def ols_calc(df, y = 'Y', x = ['X'], smf_formula = None, weight = None, regul_alpha = None, regul_type = 'L1'):
     """
     OLS = ordinary least square
     df = датасет с целевой метрикой Y и ковариатами x = ['x1', 'x2', ...]
+    smf_formula = smf-формула в R-нотации. Если указана, то значения y/x игнорируются; работает когда regul_alpha NULL
     regul_alpha; regul_type = L1/L2 = параметры для регуляризации
     L1: штраф за высокие |k1|+|k2|+...; L2: за k1**2 + k2**2 + ...
     PS. регуляризация усложняет оценку дов интевалов -> их можно считать только с bootstrap
@@ -275,7 +313,8 @@ def ols_calc(df, y = 'Y', x = ['X'], weight = None, regul_alpha = None, regul_ty
             info['regul_alpha'] = regul_alpha
     else:
         # регрессия через statsmodel (больше доп инфы)
-        smf_formula = f'{y} ~ ' + ' + '.join(x)
+        if smf_formula is None:
+            smf_formula = f'{y} ~ ' + ' + '.join(x)
         if weight is None:
             model = smf.ols(smf_formula, data = df).fit()
         else:
@@ -321,7 +360,6 @@ def get_percentile_curve(val_list, per_start = 0, per_end = 100, per_step = 5, x
     plt.figure(figsize=figsize)
     plt.plot(per_range, per_list)
     plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.xticks(per_range); plt.show()
-
 
 def histogram_visualise(X, bins = 50, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
     """Удобная визуализация для гистограммы с надписями"""
