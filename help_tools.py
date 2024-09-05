@@ -21,37 +21,81 @@ def get_normal_list(mu, std, size):
     """Получение нормально распределенной метрики - для эмуляций; size = None -> return val else return list"""
     return np.random.normal(mu, std, size)
 
-def ttest_calc(metric_1, metric_2 = None, alpha = 0.05):
-    """Применение T-распределения для оценки дов интервалов и гипотез о равенстве средних
+def ttest_calc(metric_1, metric_2 = None, alpha = 0.05, alternative = 'two-sided'):
+    """
+    https://habr.com/ru/articles/807051/
+    Применение T-распределения для оценки дов интервалов и гипотез о равенстве средних
     Условия применимости: средневыборочное метрик распределено нормально (нужно проверить отдельно - см Валидация)
     p_value >= alpha -> approve H0 else reject.
     metric_1, 2 = списки; alpha = ошибка первого рода
-    return: conf_int_avg_diff, p_value
+    alternative = 'two-sided', 'greater', 'less' - проверка альтернативной гипотезы (и односторонний дов интервал)
+    пример: alternative = greater; h0: Y - X <= 0; h1: Y - X > 0; p_val > alpha -> h0
+    PS. нельзя комбинировать дов. интервалы greater/less -> растет ошибка множественного сравнения.
+    PSS. при сравнении с реализациями вроде stats.ttest_ind важно учитывать что там проверяется не (Y-X), а (X-Y)
+    return: conf_int_mean_diff, p_value, alternative, conf_int_mean_relative_diff
     """
-    # оценки по одной величине (например, подходит для оценки конверсии в массиве 0 0 0 1 ...)
-    if metric_2 is None:
-        avg_ = np.mean(metric_1)
-        len_ = len(metric_1)
-        var_ = np.std(metric_1) ** 2 / len_
-        se = np.sqrt(var_)
-        z = stats.t.ppf(1 - alpha / 2, df=(len_ - 1))
-        p_val = 2 * (1 - stats.t.cdf(np.abs(avg_ / se), df=(len_ - 1)))
-        confint = avg_ + np.array([-1, 1]) * z * se
-    # оценки для сравнения средних двух метрик
-    else:
-        mean_1, mean_2 = np.mean(metric_1), np.mean(metric_2)
-        var = np.std(metric_1) ** 2 / len(metric_1) + np.std(metric_2) ** 2 / len(metric_2)
-        se = np.sqrt(var)
-        df = len(metric_1) + len(metric_2) - 2
-        z = stats.t.ppf(1 - alpha / 2, df=df)
-        confint = (mean_2 - mean_1) + np.array([-1, 1]) * z * se
-        p_val = 2 * (1 - stats.t.cdf(np.abs((mean_2 - mean_1) / se), df=df))
-    return confint, p_val
+     # кол-во степеней свободы в общем случае std1 != std2 (Welch test) -> df
+    def welch_df(s1, s2, n1, n2):
+        return ( (s1**2 / n1 + s2**2 / n2) ** 2 /
+                ( ( (s1**2 / n1) ** 2 / (n1 - 1) ) +
+                ( (s2**2 / n2) ** 2 / (n2 - 1) ) ) )
 
-def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4, alpha = 0.05):
+    # оценка доверительных интервалов для относительного эффекта (Y-X)/X по дельта-методу
+    # подробнее см https://habr.com/ru/companies/avito/articles/571094/
+    # грубая оценка confint_abs/avg(control) обычно более узкая, чем реальная
+    # чем больше размер сравниваемых выборок (N>10**4) - тем ближе все оценки к реальному (bootstrap)
+    # Расчет реализован только для критерия two-sided когда заданы две сравниваемые выборки
+    def conf_rel_diff_delta_method(control, test, alpha):
+        mean_control = np.mean(control)
+        var_mean_control  = np.var(control) / len(control)
+        difference_mean = np.mean(test) - mean_control
+        difference_mean_var  = np.var(test) / len(test) + var_mean_control
+        covariance = -var_mean_control
+        relative_mu = difference_mean / mean_control
+        relative_var = difference_mean_var / (mean_control ** 2) + var_mean_control * ((difference_mean ** 2) / (mean_control ** 4))\
+                        - 2 * (difference_mean / (mean_control ** 3)) * covariance
+        relative_distribution = stats.norm(loc=relative_mu, scale=np.sqrt(relative_var))
+        left_bound, right_bound = relative_distribution.ppf([alpha/2, 1-alpha/2])
+        pvalue = 2 * min(relative_distribution.cdf(0), relative_distribution.sf(0))
+        return (left_bound, right_bound), pvalue
+
+    conf_int_mean_relative_diff = None # считается только для two-sided + две метрики
+    if metric_2 is None: # оценка среднего одной метрики
+        mean_diff = np.mean(metric_1)
+        se = np.sqrt(np.std(metric_1) ** 2 / len(metric_1))
+        df = len(metric_1) - 1
+    else: # оценка разницы средних двух метрик
+        mean_diff = np.mean(metric_2) - np.mean(metric_1)
+        se = np.sqrt(np.std(metric_1) ** 2 / len(metric_1) + np.std(metric_2) ** 2 / len(metric_2))
+        df = welch_df(np.std(metric_1), np.std(metric_2), len(metric_1), len(metric_2)) # общий случай std_1 != std_2
+
+    if alternative == 'two-sided': # h1: mean_diff != 0
+        t = stats.t.ppf(1 - alpha / 2, df=df)
+        cdf_stat = stats.t.cdf(np.abs(mean_diff / se), df=df)
+        p_val = 2 * (1 - cdf_stat) # p_val > alpha -> h0: mean_diff = 0
+        confint = mean_diff + np.array([-1, 1]) * t * se
+        if metric_2 is not None:
+            conf_int_mean_relative_diff = conf_rel_diff_delta_method(metric_1, metric_2, alpha)
+
+    elif alternative == 'less': # h1: mean_diff < 0
+        t = stats.t.ppf(alpha, df=df)
+        cdf_stat = stats.t.cdf(mean_diff / se, df=df)
+        p_val = cdf_stat # p_val > alpha -> h0: mean_diff >= 0
+        confint = (-np.inf, mean_diff + t * se) # confint[1] < 0 -> h1
+
+    elif alternative == 'greater': # h1: mean_diff > 0
+        t = stats.t.ppf(1 - alpha, df=df)
+        cdf_stat = stats.t.cdf(mean_diff / se, df=df)
+        p_val = 1 - cdf_stat # p_val > alpha -> h0: mean_diff <= 0
+        confint = (mean_diff - t * se, np.inf) # confint[0] > 0 -> h1
+
+    return confint, p_val, alternative, conf_int_mean_relative_diff
+
+def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4, alpha = 0.05, diff_type = 'abs'):
     """Использование семплирования для оценки разницы статистик stat_func(X) на двух или одной метрике
     test_func -> это может быть среднее, медиана или др статистики
-    для очень малых len(metric)<100-200 нужны поправки на смещение - здесь не учитываем
+    diff_type = 'abs', 'rel'; для abs: diff = Y-X; для rel: diff = (Y-X)/X; работает только для двух выборок
+    PS. для очень малых len(metric)<100-200 нужны поправки на смещение - здесь не учитываем
     return confint_test_stat_diff, p_value
     """
     boot_list = [] # sampling
@@ -61,8 +105,13 @@ def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4,
             boot_list.append(stat_)
     else:
         for _ in range(iter):
-            stat_ = stat_func(np.random.choice(metric_2, len(metric_2), replace = True)) - stat_func(np.random.choice(metric_1, len(metric_1), replace = True))
-            boot_list.append(stat_)
+            s1 = stat_func(np.random.choice(metric_1, len(metric_1), replace = True))
+            s2 = stat_func(np.random.choice(metric_2, len(metric_2), replace = True))
+            if diff_type == 'abs':
+                diff = s2 - s1
+            elif diff_type == 'rel':
+                diff = (s2 - s1) / s1
+            boot_list.append(diff)
     confint = np.percentile(boot_list, 100 * (alpha / 2)), np.percentile(boot_list, 100 * (1 - alpha / 2))
     # p val calc
     q_ = stats.norm.cdf(x=0, loc=np.mean(boot_list), scale=np.std(boot_list, ddof=1))
@@ -136,9 +185,11 @@ def get_mde_detail(control, n_branch = 2, ratio = 1, alpha = 0.05, power = 0.8):
     delta = control_std * tt_ind_solve_power(nobs1 = N_c, alpha= alpha / comparison, power = power, ratio = ratio, alternative='two-sided')
     return f"""Участников в контроле {len(control)}, среднее: {round(control_mean, 2)}, mde_abs = {round(delta, 3)}; mde_rel = {round(100 * delta / control_mean, 1)}%"""
 
-def get_halfconfw(control, alpha = 0.05):
-    """Ширина доверительного интервала (полеззно дополняет MDE)"""
-    return stats.t.ppf(1 - alpha / 2, df=(len(control) - 1)) * np.std(control, ddof=1) / np.sqrt(len(control))
+def get_mean_diff_confint_width(control, alpha = 0.05):
+    """Ширина доверительного интервала для разности средних со схожими дисперсиями"""
+    ci_width = stats.t.ppf(1 - alpha / 2, df=(len(control) - 1)) * np.std(control, ddof=1) / np.sqrt(len(control)) # для среднего по выборке
+    # среднее для разности больше в sqrt(2) т к SE_diff = sqrt(SE_control**2 + SE_control**2)
+    return np.sqrt(2) * ci_width
 
 def check_branch_balance(f_real, f_exp = None):
     """Проверка соответствия реальных частот f_real (напр, кол-во участников в ветках экспа [105, 115])
@@ -192,21 +243,23 @@ def stat_test_errors_estimate(metric_hist = None, stat_test = None, sample_size 
     """
     https://habr.com/ru/companies/X5Tech/articles/706388/
     Оценка мощности и FPR критерия на выбранном распределении metric_hist - может быть сэмулировано, либо взято из истории
-    stat_test = стат критерий возвращающий объект с атрибутом pvalue
+    stat_test = стат критерий в формате stat_func(x, y)
     sample_size = размер генерируемых выборок (должен быть примерно как в ожидаемом ab)
     effect = ожидаемый детектируемый эффект для данных выборок
     Семплируем пары тестов из начального распределения
     """
+    def ttest(a, b):
+        return stats.ttest_ind(a, b).pvalue
     if metric_hist is None: # если не указано - эмулируем сами тестовое
             metric_hist = np.random.normal(1, 1, 10**4)
     if stat_test is None:
-        stat_test = stats.ttest_ind
+        stat_test = ttest
     pvalues_aa, pvalues_ab = [], []
     for _ in range(iter):
         a1, a2 = np.random.choice(metric_hist, size=(2, sample_size), replace=False)
         b = a2 + effect
-        pvalues_aa.append(stat_test(a1, a2).pvalue)
-        pvalues_ab.append(stat_test(a1, b).pvalue)
+        pvalues_aa.append(stat_test(a1, a2))
+        pvalues_ab.append(stat_test(a1, b))
     ch1, ch2 = (np.array(pvalues_aa) < alpha).astype(int), (np.array(pvalues_ab) >= alpha).astype(int)
     first_type_error, second_type_error = ttest_calc(ch1)[0], ttest_calc(ch2)[0]
     return first_type_error, second_type_error
@@ -222,6 +275,7 @@ def cuped_calc(df, x = ['Y_prev'], y = 'Y', T = 'exp_group', method = 'ols', df_
     df_prev - исторические данные; если заданы - то обучение идет на них, иначе - на контроле
     return: Y_adj - скорректированная целевая метрика; avg(Y) = avg(Y_adj); std(Y_adj) < std(Y)
     """
+    df = df.copy()
     df[T] = df[T].replace({'control' : 0, 'experiment' : 1}) # дополнительная подготовка
     # 1. model fit
     if df_prev is None:
