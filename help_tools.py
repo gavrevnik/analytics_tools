@@ -11,6 +11,8 @@ from causalinference import CausalModel
 from scipy.stats import chisquare
 from statsmodels.stats.multitest import multipletests
 from statsmodels.stats.power import tt_ind_solve_power
+from sklearn.neighbors import KNeighborsRegressor
+import seaborn as sns
 
 ####### СТАТИСТИЧЕСКИЕ ТЕСТЫ
 def fraq_to_list(num, denum):
@@ -422,8 +424,8 @@ def histogram_visualise(X, bins = 50, xlabel = '', ylabel = '', title = '', figs
     plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.show()
 
 
-####### CAUSAL INFERENCE METHODS
-def psm(df, X, T='treatment', Y='y'):
+####### CAUSAL INFERENCE
+def calc_psm_eff(df, X, T='treatment', Y='y'):
     """
     Propensity Score Matching
     df = массив с данными; Y = целевая метрика; X = ковариаты; T = сплит переменная в формате 0;1
@@ -443,7 +445,7 @@ def psm(df, X, T='treatment', Y='y'):
     # выводит average treatment effect после матчинга
     return cm.estimates['matching']['ate']
 
-def iptw(df, X, T='treatment', Y='y'):
+def calc_iptw_eff(df, X, T='treatment', Y='y'):
     """
     Аналогичная PSM оценка на сбалансированной через IPTW метод
     Здесь мы взвешиваем семплы (weights) в зависимости от их "экзотичности" - тем самым выправляя баланс выборок
@@ -468,3 +470,62 @@ def cohen_d(d1, d2):
     s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
     u1, u2 = np.mean(d1), np.mean(d2)
     return round(100 * (u1 - u2) / s, 2)
+
+def check_cohen_stat(df1, df2, features = None, features_excl = None):
+    """Проверяем насколько сбалансированы две сравниваемые выборки по признакам features
+    features_excl = arr, список фичей которые исключаем из расчета
+    return: df_cohen_stat, df_cohen_stat_inf (фичи с ошибками в расчете)
+    """
+    if features is None:
+        features = df1.columns
+    if features_excl is not None:
+        features = [f for f in features if f not in features_excl]
+
+    df_cohen_stat = pd.DataFrame(None, columns=['feature', 'avg1', 'avg2', 'cohen_d_percent']); j=0
+    for f in features:
+        f1, f2 = df1[f].values, df2[f].values
+        try:
+            f1_avg, f2_avg = np.round(np.mean(f1), 4), np.round(np.mean(f2), 4)
+            c = cohen_d(f1, f2)
+        except:
+            c, f1_avg, f2_avg = np.inf, np.inf, np.inf
+        df_cohen_stat.loc[j, :] = f, f1_avg, f2_avg, c; j+=1
+
+    not_calc_features = df_cohen_stat[df_cohen_stat.cohen_d_percent.apply(abs) == np.inf].feature.values
+    df_cohen_stat = df_cohen_stat[df_cohen_stat.cohen_d_percent.apply(abs) != np.inf]
+
+    cohen_total = np.sqrt(sum([j**2 for j in df_cohen_stat.cohen_d_percent.values]))
+    df_cohen_stat.loc[j, :] = 'total', '', '', cohen_total
+
+    return df_cohen_stat, not_calc_features
+
+def get_psm_df(df1, df2, features=None, features_excl=None, plot_overlap=False, ps_model=LogisticRegression()):
+    """
+    Для каждого объекта из df1 возвращаем объект из df2,
+    наиболее близкий к df1 по propensity score (ps)
+    ps_model - модель которая на объединенном датасете считает PS
+    features - фичи, по которым происходит матчинг (по умолчанию все)
+    plot_overlap - если True, то смотрим распределение ps в обеих группах (должно перекрываться)
+    """
+    if features is None:
+        features = df1.columns
+    if features_excl is not None:
+        features = [f for f in features if f not in features_excl]
+
+    df1, df2 = df1.copy(), df2.copy()
+    df1['group'] = 0; df2['group'] = 1
+    df = pd.concat([df1, df2], ignore_index=True)
+
+    # ps = вероятность каждого семпла попасть в group = 1
+    df['ps'] = ps_model.fit(df[features].values, df['group'].values).predict_proba(df[features].values)[:, 1]
+
+    # смотрим перекрытие ps в обеих группах
+    if plot_overlap == True:
+        plt.grid()
+        plt.title('check overlap')
+        sns.histplot(data=df, x='ps', hue='group')
+
+    # для датасета group = 0 находим из датасета group=1 строчки максимально близкие по ps
+    knn = KNeighborsRegressor(n_neighbors=1).fit(df[df.group == 1][['ps']], df[df.group == 1].index)
+    nearest_neighbors_idx = knn.predict(df[df.group == 0][['ps']]).astype(int)
+    return df.loc[nearest_neighbors_idx, :].drop(columns=['group', 'ps'])
