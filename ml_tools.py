@@ -5,6 +5,35 @@ from sklearn.metrics import roc_auc_score, classification_report
 
 
 ### CatBoostClassifier
+def init_catboostclassifier(params = None, train_pool = None, test_pool = None):
+    """Инициализирует модель обучения с заданными параметрами params
+    train, test_pool - датасеты с тренировочными и тестовыми данными модели
+    """
+    if params is None:
+        params = {
+                'depth': 6, # глубина деревьев (больше = сложнее зависимости, но дольше и риск переобуч)
+                'learning_rate': 0.03, # шаг изменения параметров при добавлении нового дерева в ансамбль (аналогично depth)
+                'iterations': 1000, # количество деревьев в ансамбле
+                'l2_leaf_reg': 3, # штраф за большие веса в листьях (аналогично рег. в регрессии)
+                'bagging_temperature': 1, # интенсивность рандомизации при бустрапе в ансамбле
+                'auto_class_weights': 'Balanced', # автоматически присвоить веса меткам обр. пропорционально частоте
+                'random_strength': 1, # рандомизация сплитования (также влияет на переобучение)
+                'loss_function' : 'Logloss', # функция потерь которую оптимизиуем при обучении дерева
+                'eval_metric' : 'F1', # метрика, которую оптимизирует ансамбль
+                'verbose' : False, # не выводить логи с каждой иттерации (можно указать частоту)
+            #     'silent' : False # полностью отключить вывод логов модели когда true (задается либо silent либо verbose)
+                }
+    model = CatBoostClassifier(**params)
+    result = None
+    if train_pool is not None:
+        model.fit(train_pool, eval_set=test_pool, use_best_model=True)
+        predict_vals = model.predict(test_pool)
+        predict_proba_vals = model.predict_proba(test_pool)[:, 1] # 0 - предикт метки 0, 1 = 1, ...
+        df_importance = pd.DataFrame({'feature' : train_pool.get_feature_names(),
+                      'feature_importance' : model.feature_importances_}).sort_values(by='feature_importance', ascending=False)
+        result = {'predict_vals' : predict_vals, 'predict_proba_vals' : predict_proba_vals, 'df_importance' : df_importance}
+    return model, result
+
 def get_pool(df_x, y, cat_features=None, fillna_val='NULL'):
     """Возвращаем тренировочный объект Pool для работы моделей
     df_x, y = фичи и таргет для тренировки
@@ -30,7 +59,9 @@ def get_from_pool(pool):
 def get_cv(params, pool, fold_count):
     """Кросс-валидация результатов модели на данных pool
     с гиперпараметрами params
-    fold_count = 3-10; чем выше - тем больше точность модели, но дольше обучение"""
+    fold_count = 3-10; чем выше - тем больше точность модели, но дольше обучение
+    return: оцениваемые значения для eval_metric
+    """
 
     cv_results = cv(
         params=params, # гиперпараметры модели которые тестим
