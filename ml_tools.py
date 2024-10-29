@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from catboost import CatBoostClassifier, cv, Pool
 from sklearn.metrics import roc_auc_score, classification_report
+from sklearn.model_selection import learning_curve, validation_curve, cross_validate, RandomizedSearchCV, GridSearchCV
+import matplotlib.pyplot as plt
 
 
 ### CatBoostClassifier
@@ -56,7 +58,7 @@ def get_from_pool(pool):
     y = pool.get_label()
     return df_x, y
 
-def get_cv(params, pool, fold_count):
+def get_catboost_cv(params, pool, fold_count):
     """Кросс-валидация результатов модели на данных pool
     с гиперпараметрами params
     fold_count = 3-10; чем выше - тем больше точность модели, но дольше обучение
@@ -73,7 +75,7 @@ def get_cv(params, pool, fold_count):
         )
     return cv_results[-1:]
 
-### метрики качества
+### МЕТРИКИ КАЧЕСТВА
 def get_model_score(y_test, y_predict, y_predict_probability=None):
     """
     y_test - реальные значения на тестовом сете
@@ -86,3 +88,92 @@ def get_model_score(y_test, y_predict, y_predict_probability=None):
     if y_predict_probability is not None:
         ans['roc_auc'] = roc_auc_score(y_test, y_predict_probability)
     return ans
+
+
+###  ВАЛИДАЦИЯ МОДЕЛЕЙ
+def get_cv(model, X, y, cv = 5):
+    """Кросс валидация модели model по группе метрик качества; выводим значения avg(scoring) +- std(scoring); cv=число фолдов разбиения"""
+    result_ = cross_validate(model, X, y, scoring = ['f1', 'roc_auc', 'accuracy', 'recall', 'precision'], cv = cv)
+    result = {}
+    for j in result_.keys():
+        if j not in ['fit_time', 'score_time']:
+            result[j.split('test_')[1]] = f"""{np.round(np.mean(result_[j]), 3)} +- {np.round(np.std(result_[j]), 3)}"""
+    return result
+
+def hyper_params_search(model, X, y, param_grid, scoring='f1', cv=5, n_iter = None, return_best_model = False):
+    """Перебор гиперпараметров model на X, y через кросс-валидацию cv
+    n_iter - число случайных семплов сетки; n_iter = None -> стандартный grid_search
+    param_grid = {a : [1,2,3], ...} или вероятностно (для rand_search) param_grid = {a : uniform(loc=0, scale=4)}
+    """
+    if n_iter is not None:
+        search = RandomizedSearchCV(model, param_grid, n_iter=n_iter, scoring=scoring, cv=cv)
+    else:
+        search = GridSearchCV(model, param_grid, scoring=scoring, cv=cv)
+    search = search.fit(X, y)
+    result = {'best_params' : search.best_params_,
+              'best_score' : search.best_score_}
+    if return_best_model:
+        result['best_model'] = search.best_estimator_
+    return result
+
+def get_learning_and_validation_curve(model, X, y, scoring='f1',
+                       train_sizes=None,
+                       param_name=None,
+                       param_range=None,
+                       cv=5,
+                       plot=True,
+                       figsize=(15, 4)
+                       ):
+    """
+    Строим зависимость качества обучения на тренировке/тесте от размера выборки или гиперпараметров
+    train_sizes = [0.25, 0.5, 1] -> процент тренировочной выборки - исходная = len(X) * (cv-1)/cv
+    param_range = [1, 2, 3] -> значения перебираемого гиперпараметра модели param_name
+    plot = True - визуализация кривых обучения и валидации на месте
+    return: result = список посчитанных значений
+    """
+    result = {}
+    fig, axs = plt.subplots(1, 2, figsize=figsize)
+
+    # обучающая кривая
+    if train_sizes is not None:
+        train_sizes_abs, train_scores, test_scores = learning_curve(model, X, y,
+                                                                          train_sizes=train_sizes,
+                                                                          scoring=scoring,
+                                                                          cv=cv)
+
+
+        result['learning_train_sizes'] = train_sizes_abs
+        result['learning_train_scores'] = train_scores
+        result['learning_test_scores'] = test_scores
+
+        if plot == True:
+            # plt.figure(figsize=figsize)  # Установка размера графика
+            axs[0].plot(train_sizes_abs, train_scores.mean(axis=1), label='train_scores', color='blue', marker='o')
+            axs[0].plot(train_sizes_abs, test_scores.mean(axis=1), label='test_scores', color='orange', marker='x')
+            axs[0].set_title(f'learning curve - качество обучения от объема данных')
+            axs[0].set_xlabel('train_sizes frac')
+            axs[0].set_ylabel(f'AVG {scoring}')
+            axs[0].legend()
+            axs[0].grid()
+
+
+    # валидационная кривая
+    if param_name is not None:
+        train_scores, test_scores = validation_curve(model, X, y,
+                                                     param_name=param_name,
+                                                     param_range=param_range,
+                                                     scoring=scoring, cv=cv)
+        result['validation_train_scores'] = train_scores
+        result['validation_test_scores'] = test_scores
+
+        if plot == True:
+            # plt.figure(figsize=figsize)  # Установка размера графика
+            axs[1].plot(param_range, train_scores.mean(axis=1), label='train_scores', color='blue', marker='o')
+            axs[1].plot(param_range, test_scores.mean(axis=1), label='test_scores', color='orange', marker='x')
+            axs[1].set_title(f'validation curve - качество обучения от {param_name}')
+            axs[1].set_xlabel(param_name)
+            axs[1].set_ylabel(f'AVG {scoring}')
+            axs[1].legend()
+            axs[1].grid()
+
+    return result
