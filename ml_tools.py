@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 from catboost import CatBoostClassifier, cv, Pool
-from sklearn.metrics import roc_auc_score, classification_report
+from sklearn.metrics import roc_auc_score, classification_report, mean_absolute_error, mean_squared_error,r2_score, mean_absolute_percentage_error
+from  sklearn.preprocessing import OrdinalEncoder
 from sklearn.model_selection import learning_curve, validation_curve, cross_validate, RandomizedSearchCV, GridSearchCV
 import matplotlib.pyplot as plt
 
@@ -76,21 +77,42 @@ def get_catboost_cv(params, pool, fold_count):
     return cv_results[-1:]
 
 ### МЕТРИКИ КАЧЕСТВА
-def get_model_score(y_test, y_predict, y_predict_probability=None):
+def get_model_score(y_test, y_predict, is_clf=True, y_predict_probability=None):
     """
+    is_clf - является ли модель классификатором. Если нет - то оцениваем как регрессию
     y_test - реальные значения на тестовом сете
     y_predict - предсказания модели
     y_predict_probability - вероятность принадлежности к классу 1 (если модель дает)
     """
-    report = classification_report(y_test, y_predict, digits=4, output_dict=True)
-    ans = report['1']
-    ans['accuracy'] = report['accuracy']
-    if y_predict_probability is not None:
-        ans['roc_auc'] = roc_auc_score(y_test, y_predict_probability)
+    if is_clf:
+        report = classification_report(y_test, y_predict, digits=4, output_dict=True)
+        ans = report['1']
+        ans['accuracy'] = report['accuracy']
+        if y_predict_probability is not None:
+            ans['roc_auc'] = roc_auc_score(y_test, y_predict_probability)
+    else:
+        mae = mean_absolute_error(y_test, y_predict)
+        rmse = np.sqrt(mean_squared_error(y_test, y_predict))
+        r2 = r2_score(y_test, y_predict)
+        mape = mean_absolute_percentage_error(y_test, y_predict)
+        ans = {'R^2' : r2, 'MAE-Mean_Abs_Err' : mae, 'RMSE-Root_Mean_Sq_Err' : rmse, 'MAPE-Mean_abs_perc_err_%' : 100 * mape}
     return ans
 
+### ПРЕПРОЦЕССИНГ
+def ordinal_encoder(df, ordinal_dict, fillna_val = -1):
+    """
+    df = датасет с фичами; ordinal_dict = {feature_name : [f1, f2, ...], ...}
+    Осуществляет кодирование порядковых фичей целыми 0,1,2.. согласно порядку в ordinal_dict
+    Наличие пропусков также можно учесть в ordinal_dict
+    """
+    df_ = df.copy()
+    categorical_features = list(ordinal_dict.keys())
+    encoder = OrdinalEncoder(categories=list(ordinal_dict.values()))
+    df_[categorical_features] = encoder.fit_transform(df_[categorical_features].values)
+    return df_
 
-###  ВАЛИДАЦИЯ МОДЕЛЕЙ
+
+###  ВАЛИДАЦИЯ
 def get_cv(model, X, y, cv = 5):
     """Кросс валидация модели model по группе метрик качества; выводим значения avg(scoring) +- std(scoring); cv=число фолдов разбиения"""
     result_ = cross_validate(model, X, y, scoring = ['f1', 'roc_auc', 'accuracy', 'recall', 'precision'], cv = cv)
