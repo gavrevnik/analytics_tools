@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
 from catboost import CatBoostClassifier, cv, Pool
-from sklearn.metrics import roc_auc_score, classification_report, mean_absolute_error, mean_squared_error,r2_score, mean_absolute_percentage_error
-from  sklearn.preprocessing import OrdinalEncoder
+from sklearn.metrics import roc_auc_score, classification_report, mean_absolute_error, mean_squared_error,r2_score, mean_absolute_percentage_error, silhouette_score, calinski_harabasz_score
+from  sklearn.preprocessing import OrdinalEncoder, StandardScaler
 from sklearn.model_selection import learning_curve, validation_curve, cross_validate, RandomizedSearchCV, GridSearchCV
+from sklearn.cluster import KMeans, DBSCAN
 import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
 
 
 ### CatBoostClassifier
@@ -199,3 +201,57 @@ def get_learning_and_validation_curve(model, X, y, scoring='f1',
             axs[1].grid()
 
     return result
+
+### КЛАСТЕРНЫЙ АНАЛИЗ
+def find_clusters(X, method='kmeans', n_clusters=3, eps=0.5, N=5, scaler=True):
+    """
+    Кластеризация данных X (df.values) через dbscan или kmeans
+    scaler - нужно ли перед этим масштабировать признаки для кластеризации (по умолчанию полезно)
+    n_clusters - заданное кол-во кластеров для kmeans
+    eps, N - окрестность и мин число семплов для dbscan
+    return: лейблы кластеров и метрики качества алгоритмов
+    """
+
+    inertia, silhouette, ch_score = None, None, None
+    if scaler == True:
+        X = StandardScaler().fit_transform(X)
+
+    if method == 'kmeans':
+        label_cnt = n_clusters
+        kmeans = KMeans(n_clusters=n_clusters)
+        labels = kmeans.fit_predict(X) # метки кластеров
+        inertia = kmeans.inertia_
+        if label_cnt > 1:
+            silhouette = silhouette_score(X, labels)
+            ch_score = calinski_harabasz_score(X, labels)
+
+
+    elif method == 'dbscan':
+        dbscan = DBSCAN(eps=eps, min_samples=N)
+        labels = dbscan.fit_predict(X) # метки кластеров, -1 = шум
+        label_cnt = np.unique(labels[labels!=-1]).shape[0]
+        if label_cnt > 1:
+            silhouette = silhouette_score(X[labels != -1], labels[labels != -1])
+            ch_score = calinski_harabasz_score(X[labels != -1], labels[labels != -1])
+
+    metrics = {'inertia' : inertia, 'silhouette' : silhouette, 'ch_score' : ch_score, 'label_cnt' : label_cnt}
+    return labels, metrics
+
+def t_sne(X, y=None, scaler=True, plot=True, random_state = 0):
+    """
+    Применяем t-sne метод понижения размерности до 2 с сохранением относительного расстояния
+    для визуализации элементов множества
+    X - датасет df.value; y - метка, для цветовой визуализации (если есть)
+    scaler, plot = флаги предварительной нормализации и отрисовки полученного датасета
+    """
+    if scaler == True:
+        X = StandardScaler().fit_transform(X)
+    tsne = TSNE(n_components=2, random_state=random_state)
+    X_tsne = tsne.fit_transform(X)
+
+    if plot == True:
+        plt.figure(figsize=(10, 8))
+        scatter = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y, s=10, alpha=0.7)
+        plt.colorbar(scatter)
+
+    return X_tsne
