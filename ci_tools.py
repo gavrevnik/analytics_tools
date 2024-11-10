@@ -114,3 +114,57 @@ def get_psm_df(df1, df2, features=None, features_excl=None, plot_overlap=False, 
     knn = KNeighborsRegressor(n_neighbors=1).fit(df[df.group == 1][['ps']], df[df.group == 1].index)
     nearest_neighbors_idx = knn.predict(df[df.group == 0][['ps']]).astype(int)
     return df.loc[nearest_neighbors_idx, :].drop(columns=['group', 'ps'])
+
+def calc_did(con_before, con_after, exp_before, exp_after):
+    """
+    DIFF-IN-DIFF
+    Расчет изменения метрики в ветке exp до/после из-за целевого влияния,
+    DID = (exp_avg_after - exp_avg_before) - (control_avg_after - control_avg_before)
+    Ключевое условие: параллельность трендов exp/control до целевого влияния (проверять отдельно)
+    exp, con = arr; массив значений для семплов before/after целевого влияния (метрика)
+    return: {DID, DID_p_val>0, DID_confint}
+    """
+    # собираем датасет из имеющихся данных
+    df1 = pd.DataFrame({'metric' : exp_before}); df1['exp_group'] = 1; df1['dt'] = 0
+    df2 = pd.DataFrame({'metric' : exp_after}); df2['exp_group'] = 1; df2['dt'] = 1
+    df3 = pd.DataFrame({'metric' : con_before}); df3['exp_group'] = 0; df3['dt'] = 0
+    df4 = pd.DataFrame({'metric' : con_after}); df4['exp_group'] = 0; df4['dt'] = 1
+    df = pd.concat([df1, df2, df3, df4], ignore_index=True)
+    # обучаем регрессию
+    model = smf.ols('metric ~ exp_group + dt + exp_group * dt', data=df).fit()
+    ans = {}
+    ans['did'] = model.params.loc['exp_group:dt']
+    ans['did_confint'] = (model.conf_int().loc['exp_group:dt'][0], model.conf_int().loc['exp_group:dt'][1])
+    ans['pval_did>0'] = model.pvalues.loc['exp_group:dt']
+    return ans
+
+def calc_rdd(metric, x, x_target, use_weights=True, c=0, h=1):
+    """
+    Regression Discounty Design
+    Оценка эффекта на metric целевого влияния произошедшего в x_target
+    metric - исследуемая метрика; x - независимая ковариата (например, время)
+    считаем что при x<x0 целевого влияния не было, а при x>=x0 было
+    Оцениваем скачок metric из-за влияния:
+    rdd = metric(x=x0+e) - metric(x=x0-e) = delta_metric
+    use_weights = использовать функцию,  штрафующую семплы при удалении от границы разрыва
+    c, h = параметры функции: высота, ширина ядра
+    return: {rdd, rdd_confint, p_val_rdd>0}
+    """
+    # смещаем "момент" целевого влияния в точку 0
+    df = pd.DataFrame({'metric' : metric, 'x' : x})
+    df['x'] = df['x'] - x_target
+    df['D'] = (df.x > 0).astype(int)
+
+    # обучаем модель с ядром, штрафующим влияние точек при удалении от границы разрыва
+    def kernel(R, c, h):
+        indicator = (np.abs(R-c) <= h).astype(float)
+        return indicator * (1 - np.abs(R-c)/h)
+    if use_weights:
+        model = smf.wls("metric ~ x * D + D + x", df, weights=kernel(df.x.values, c=c, h=h)).fit()
+    else:
+        model = smf.wls("metric ~ x * D + D + x", df).fit()
+    ans = {}
+    ans['rdd'] = model.params.loc['D']
+    ans['rdd_confint'] = (model.conf_int().loc['D'][0], model.conf_int().loc['D'][1])
+    ans['pval_rdd>0'] = model.pvalues.loc['D']
+    return ans

@@ -7,6 +7,8 @@ from sklearn.model_selection import learning_curve, validation_curve, cross_vali
 from sklearn.cluster import KMeans, DBSCAN
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
+import umap
+from sklearn.decomposition import PCA
 
 
 ### CatBoostClassifier
@@ -115,14 +117,25 @@ def ordinal_encoder(df, ordinal_dict, fillna_val = -1):
 
 
 ###  ВАЛИДАЦИЯ
-def get_cv(model, X, y, cv = 5):
-    """Кросс валидация модели model по группе метрик качества; выводим значения avg(scoring) +- std(scoring); cv=число фолдов разбиения"""
-    result_ = cross_validate(model, X, y, scoring = ['f1', 'roc_auc', 'accuracy', 'recall', 'precision'], cv = cv)
-    result = {}
-    for j in result_.keys():
-        if j not in ['fit_time', 'score_time']:
-            result[j.split('test_')[1]] = f"""{np.round(np.mean(result_[j]), 3)} +- {np.round(np.std(result_[j]), 3)}"""
-    return result
+def get_cv(model, X, y, cv = 5, is_clf=1):
+    """Кросс валидация модели model по группе метрик качества
+    cv=число фолдов разбиения
+    is_clf: 0 = регрессия, 1 = классификация
+    return ср. метрики качества по фолдам для тренировки и теста
+    """
+    if is_clf == 1:
+        scoring_list = ['f1', 'f1_macro', 'f1_micro', 'roc_auc', 'accuracy', 'recall', 'precision']
+    else:
+        scoring_list = ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error', 'neg_mean_absolute_percentage_error']
+    result_ = cross_validate(model, X, y, scoring = scoring_list, cv = cv, return_train_score=True)
+    test_dct, train_dct = {}, {}
+    for j in [j for j in result_.keys() if 'test_' in j]:
+        test_dct[j.split('test_')[1]] = f"""{np.round(np.mean(result_[j]), 4)} +- {np.round(np.std(result_[j]), 4)}"""
+    for j in [j for j in result_.keys() if 'train_' in j]:
+        train_dct[j.split('train_')[1]] = f"""{np.round(np.mean(result_[j]), 4)} +- {np.round(np.std(result_[j]), 4)}"""
+    df_test = pd.DataFrame({'metric' : list(test_dct.keys()), 'test_score' : list(test_dct.values())})
+    df_train = pd.DataFrame({'metric' : list(train_dct.keys()), 'train_score' : list(train_dct.values())})
+    return df_test.merge(df_train)
 
 def hyper_params_search(model, X, y, param_grid, scoring='f1', cv=5, n_iter = None, return_best_model = False):
     """Перебор гиперпараметров model на X, y через кросс-валидацию cv
@@ -141,13 +154,8 @@ def hyper_params_search(model, X, y, param_grid, scoring='f1', cv=5, n_iter = No
     return result
 
 def get_learning_and_validation_curve(model, X, y, scoring='f1',
-                       train_sizes=None,
-                       param_name=None,
-                       param_range=None,
-                       cv=5,
-                       plot=True,
-                       figsize=(15, 4)
-                       ):
+                       train_sizes=None, param_name=None, param_range=None,
+                       cv=5, plot=True, figsize=(15, 4)):
     """
     Строим зависимость качества обучения на тренировке/тесте от размера выборки или гиперпараметров
     train_sizes = [0.25, 0.5, 1] -> процент тренировочной выборки - исходная = len(X) * (cv-1)/cv
@@ -156,50 +164,26 @@ def get_learning_and_validation_curve(model, X, y, scoring='f1',
     return: result = список посчитанных значений
     """
     result = {}
-    fig, axs = plt.subplots(1, 2, figsize=figsize)
-
+    _, axs = plt.subplots(1, 2, figsize=figsize)
     # обучающая кривая
     if train_sizes is not None:
-        train_sizes_abs, train_scores, test_scores = learning_curve(model, X, y,
-                                                                          train_sizes=train_sizes,
-                                                                          scoring=scoring,
-                                                                          cv=cv)
-
-
-        result['learning_train_sizes'] = train_sizes_abs
-        result['learning_train_scores'] = train_scores
-        result['learning_test_scores'] = test_scores
-
+        train_sizes_abs, train_scores, test_scores = learning_curve(model, X, y, train_sizes=train_sizes, scoring=scoring, cv=cv)
+        result['learning_train_sizes'] = train_sizes_abs; result['learning_train_scores'] = train_scores; result['learning_test_scores'] = test_scores
         if plot == True:
-            # plt.figure(figsize=figsize)  # Установка размера графика
             axs[0].plot(train_sizes_abs, train_scores.mean(axis=1), label='train_scores', color='blue', marker='o')
             axs[0].plot(train_sizes_abs, test_scores.mean(axis=1), label='test_scores', color='orange', marker='x')
             axs[0].set_title(f'learning curve - качество обучения от объема данных')
-            axs[0].set_xlabel('train_sizes frac')
-            axs[0].set_ylabel(f'AVG {scoring}')
-            axs[0].legend()
-            axs[0].grid()
-
-
+            axs[0].set_xlabel('train_sizes frac'); axs[0].set_ylabel(f'AVG {scoring}'); axs[0].legend(); axs[0].grid()
     # валидационная кривая
     if param_name is not None:
-        train_scores, test_scores = validation_curve(model, X, y,
-                                                     param_name=param_name,
-                                                     param_range=param_range,
-                                                     scoring=scoring, cv=cv)
+        train_scores, test_scores = validation_curve(model, X, y, param_name=param_name, param_range=param_range, scoring=scoring, cv=cv)
         result['validation_train_scores'] = train_scores
         result['validation_test_scores'] = test_scores
-
         if plot == True:
-            # plt.figure(figsize=figsize)  # Установка размера графика
             axs[1].plot(param_range, train_scores.mean(axis=1), label='train_scores', color='blue', marker='o')
             axs[1].plot(param_range, test_scores.mean(axis=1), label='test_scores', color='orange', marker='x')
             axs[1].set_title(f'validation curve - качество обучения от {param_name}')
-            axs[1].set_xlabel(param_name)
-            axs[1].set_ylabel(f'AVG {scoring}')
-            axs[1].legend()
-            axs[1].grid()
-
+            axs[1].set_xlabel(param_name); axs[1].set_ylabel(f'AVG {scoring}'); axs[1].legend(); axs[1].grid()
     return result
 
 ### КЛАСТЕРНЫЙ АНАЛИЗ
@@ -237,21 +221,56 @@ def find_clusters(X, method='kmeans', n_clusters=3, eps=0.5, N=5, scaler=True):
     metrics = {'inertia' : inertia, 'silhouette' : silhouette, 'ch_score' : ch_score, 'label_cnt' : label_cnt}
     return labels, metrics
 
-def t_sne(X, y=None, scaler=True, plot=True, random_state = 0):
+def apply_2d_map(X, scaler=True, model_type = 'umap', n_neighbors=15, min_dist=0.1, random_state=None):
     """
-    Применяем t-sne метод понижения размерности до 2 с сохранением относительного расстояния
+    Применяем метод понижения размерности до 2 с сохранением относительного расстояния
     для визуализации элементов множества
+    model_type = umap, tsne; umap более продвинутый и быстрый графовый метод
+    (n_neighbors, min_dist) - параметры для umap; n_neighbors выше - микро-тренды, ниже - макро
     X - датасет df.value; y - метка, для цветовой визуализации (если есть)
-    scaler, plot = флаги предварительной нормализации и отрисовки полученного датасета
+    scaler = флаги предварительной нормализации
     """
     if scaler == True:
         X = StandardScaler().fit_transform(X)
-    tsne = TSNE(n_components=2, random_state=random_state)
-    X_tsne = tsne.fit_transform(X)
+    if model_type == 'umap':
+        model = umap.UMAP(n_components=2, n_neighbors=n_neighbors, min_dist=min_dist, random_state=random_state)
+    else:
+        model = TSNE(n_components=2, random_state=random_state)
+    X_map = model.fit_transform(X)
+    # plt.figure(figsize=(10, 8)); scatter = plt.scatter(X_map[:, 0], X_map[:, 1], c=y_sample, cmap='tab10', s=10, alpha=0.7)
+    # plt.colorbar(scatter, ticks=range(10), label="Цифры")
+    return X_map
 
-    if plot == True:
-        plt.figure(figsize=(10, 8))
-        scatter = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y, s=10, alpha=0.7)
-        plt.colorbar(scatter)
+def apply_pca(X, n_components = 'mle', n_components_range = None, scaler=True):
+    """
+    Применение PCA для понижение размерности датасета фичей X = df_x.values
+    Для каждого кол-ва компонент максимизируется evr = explained_var_ratio
+    scaler: нормализовать ли данные перед понижением размерностей (true по умолчанию)
+    n_components_range (list) - если задан, то возвращает df_evr = n_components, evr
+    n_components:
+        'mle' - ищет через макс правдоподобие мин. размерность балансируя evr (оч консервативно)
+        r=(0, 1) - найдет мин. кол-во компонент сохраняя evr = r
+        int - найдет мин кол-во компонент равное этому числу
+    return:
+    - df_evr (если задан список перебора)
+    - X_transform
+    - evr_transform
+    """
+    if scaler:
+        X = StandardScaler().fit_transform(X)
 
-    return X_tsne
+    # режим перебора значений
+    df_evr = None
+    if n_components_range is not None:
+        explained_variance = []
+        for n in n_components_range:
+            pca = PCA(n_components=n)
+            pca.fit(X)
+            explained_variance.append(np.sum(pca.explained_variance_ratio_))
+        df_evr = pd.DataFrame({'n_components' : n_components_range, 'evr' : explained_variance})
+
+    # конкретное преобразование
+    pca = PCA(n_components=n_components)
+    X_transform = pca.fit_transform(X)
+    evr = np.sum(pca.explained_variance_ratio_)
+    return X_transform, evr, df_evr
