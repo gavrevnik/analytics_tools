@@ -303,6 +303,17 @@ def cuped_calc(df, x = ['Y_prev'], y = 'Y', T = 'exp_group', method = 'ols', df_
     Y = df[y].values; Y_adj = Y - (Y_forecast - np.mean(Y_forecast))
     return Y_adj
 
+def cuped_simple(df, y = 'Y', y_cov = 'Y_cov', treatment_name = 'exp_group'):
+    """
+    Получаем Y_adj из предиктивной ковариаты (Y_previous или берем из модели)
+    Главное условие np.cov(exp_group, Y_pred) = 0!
+    """
+    treatment = df[treatment_name].replace('control', 0).replace('experiment', 1).values
+    Y_cov = df[y_cov].values; Y = df[y].values
+    theta = np.cov(Y_cov, Y)[0, 1] / np.var(Y_cov)
+    Y_adj = Y - theta * (Y_cov - np.mean(Y_cov))
+    print(f'corr(T, Y_cov) = {np.round(np.corrcoef(treatment, Y_cov)[0, 1], 4)}; corr(Y, Y_cov) = {np.round(np.corrcoef(Y, Y_cov)[0, 1], 4)}; theta = {np.round(theta, 4)}')
+    return Y_adj
 
 ####### ПРЕОБРАЗОВАНИЯ МЕТРИК
 # бакетный анализ
