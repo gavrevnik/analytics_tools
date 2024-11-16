@@ -25,9 +25,11 @@ export PS1="\u@\h \[\e[32m\]\w \[\e[31m\]\$(parse_git_branch)\[\e[00m\]$ "
 
 
 git config --global alias.hist log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short;
-git config --global core.excludesFile '~/.gitignore_global';
-echo '*.DS_Store' >> ~/. gitignore_global
-echo '*.py[cod]' >> ~/. gitignore_global
+## запускать при обновлении файла gitignore_global
+git config --global core.excludesFile '~/.gitignore_global'; 
+echo '*.DS_Store' >> ~/.gitignore_global
+echo '*.py[cod]' >> ~/.gitignore_global
+echo 'catboost_info/' >> ~/.gitignore_global
 echo '*/.ipynb_checkpoints/*.ipynb' >> ~/.gitignore_global
 
 

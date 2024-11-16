@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import umap
 from sklearn.decomposition import PCA
-
+from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
+from scipy.stats import f_oneway
 
 ### CatBoostClassifier
 def init_catboostclassifier(params = None, train_pool = None, test_pool = None):
@@ -115,6 +116,31 @@ def ordinal_encoder(df, ordinal_dict, fillna_val = -1):
     df_[categorical_features] = encoder.fit_transform(df_[categorical_features].values)
     return df_
 
+def get_univariate_target_relation(dfx, Y, y_type = 'd', anova_calc = True, discrete_features='auto', random_state = 42, alpha=0.05):
+    """Получаем связь фичей с таргетом - корреляции, MI
+    dfx - датасет с признаками; Y - таргет; y_type = d (discrete, clf), c (continuous, regr)
+    discrete_features = список фичей (arr) либо авто-определение по bool типам
+    anova_calc = проверка значимости фичей относительно таргета (только для y_type = d)
+    return df = виды корреляций + MI взаимосвязи + anova_check"""
+    dfx = dfx.copy()
+    # mutual information
+    mi_model = [mutual_info_classif if y_type == 'd' else mutual_info_regression][0]
+    mi_vals = mi_model(dfx, Y, discrete_features = discrete_features, random_state = random_state)
+    df = pd.DataFrame({'features' : dfx.columns, 'mi': mi_vals})
+    # correlation
+    dfx['target_y'] = Y
+    df['corr_pearson'] = dfx.corr(method='pearson')['target_y'].values[:-1]
+    df['corr_spearman_rang'] = dfx.corr(method='spearman')['target_y'].values[:-1]
+    # anova = проверка что значения таргета зависят от среднего признаков
+    if (anova_calc == True) and (y_type == 'd'):
+        results = []
+        for col in dfx.drop(columns = ['target_y']).columns:
+            groups = [dfx[col][Y == category] for category in np.unique(Y)]
+            _, p_value = f_oneway(*groups)
+            results.append(p_value)
+        df['anova_pval'] = results
+        df['anova_is_feature_useful'] = (df.anova_pval < alpha).astype(int)
+    return df
 
 ###  ВАЛИДАЦИЯ
 def get_cv(model, X, y, cv = 5, is_clf=1):
@@ -274,3 +300,21 @@ def apply_pca(X, n_components = 'mle', n_components_range = None, scaler=True):
     X_transform = pca.fit_transform(X)
     evr = np.sum(pca.explained_variance_ratio_)
     return X_transform, evr, df_evr
+
+def get_pca_and_features_relation(dfx, n_components = None, scaler=True):
+    """Преобразуем фичи dfx = x1, x2, ... в пространство главных компонент pc1, pc2, ...
+    с той же размерностью (сохраняя полную вариацию данных)
+    Оцениваем важность каждой pc1 и физическую взаимосвязь с x1, x2, ...
+    """
+    if scaler:
+        X = StandardScaler().fit_transform(dfx)
+    if n_components == None:
+        pca = PCA()
+    else:
+        pca = PCA(n_components=n_components)
+    X_pca = pca.fit_transform(X)
+    component_names = [f"PC{i+1}" for i in range(X_pca.shape[1])]
+    df_relation = pd.DataFrame(pca.components_.T,  columns=component_names, index=dfx.columns)
+    df_relation.loc['evr'] = pca.explained_variance_ratio_
+    dfx_pca = pd.DataFrame(X_pca, columns=component_names)
+    return df_relation, dfx_pca
