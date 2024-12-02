@@ -39,8 +39,8 @@ def calc_iptw_eff(df, X, T='treatment', Y='y'):
     """
     df['ps'] = LogisticRegression(C=1e6).fit(df[X], df[T]).predict_proba(df[X])[:, 1]
     # IPTW calc
-    weight = ((df.treatment - df.ps) / (df.ps * (1 - df.ps)))
-    return np.mean(weight * df.y)
+    weight = ((df[T] - df.ps) / (df.ps * (1 - df.ps)))
+    return np.mean(weight * df[Y])
 
 def cohen_d(d1, d2):
     """
@@ -54,7 +54,7 @@ def cohen_d(d1, d2):
     s1, s2 = np.var(d1, ddof=1), np.var(d2, ddof=1)
     s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
     u1, u2 = np.mean(d1), np.mean(d2)
-    return round(100 * (u1 - u2) / s, 2)
+    return round(100 * (u2 - u1) / s, 2)
 
 def check_cohen_stat(df1, df2, features = None, features_excl = None):
     """Проверяем насколько сбалансированы две сравниваемые выборки по признакам features
@@ -108,12 +108,22 @@ def get_psm_df(df1, df2, features=None, features_excl=None, plot_overlap=False, 
     if plot_overlap == True:
         plt.grid()
         plt.title('check overlap')
-        sns.histplot(data=df, x='ps', hue='group')
+        sns.histplot(data=df, x='ps', hue='group', stat="probability", bins=100)
 
     # для датасета group = 0 находим из датасета group=1 строчки максимально близкие по ps
     knn = KNeighborsRegressor(n_neighbors=1).fit(df[df.group == 1][['ps']], df[df.group == 1].index)
     nearest_neighbors_idx = knn.predict(df[df.group == 0][['ps']]).astype(int)
     return df.loc[nearest_neighbors_idx, :].drop(columns=['group', 'ps'])
+
+def get_psm_df_sym(df1, df2, features=None, features_excl=None, plot_overlap=False, ps_model=LogisticRegression()):
+    """Для PSM матчинг симметричный, т.е сначала подбираем df2_matched для df1, а затем наборот и уже по объединению оцениваем эффект
+    Построено на базе функции get_psm_df
+    """
+    df2m = get_psm_df(df1, df2, features, features_excl, plot_overlap, ps_model) # подобрали df2m максимально близкий по ковариатам к df1
+    df1m = get_psm_df(df2, df1, features, features_excl, plot_overlap, ps_model) # сделали подбор наоборот
+    df1_combined = pd.concat([df1, df1m], ignore_index=True)
+    df2_combined = pd.concat([df2m, df2], ignore_index=True)
+    return df1_combined, df2_combined
 
 def calc_did(con_before, con_after, exp_before, exp_after):
     """

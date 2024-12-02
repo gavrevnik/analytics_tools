@@ -8,8 +8,10 @@ from sklearn.cluster import KMeans, DBSCAN
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import umap
+import shap
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
+from sklearn.inspection import PartialDependenceDisplay as pdp
 from scipy.stats import f_oneway
 
 ### CatBoostClassifier
@@ -318,3 +320,31 @@ def get_pca_and_features_relation(dfx, n_components = None, scaler=True):
     df_relation.loc['evr'] = pca.explained_variance_ratio_
     dfx_pca = pd.DataFrame(X_pca, columns=component_names)
     return df_relation, dfx_pca
+
+### ИНТЕРПРЕТАЦИЯ РЕЗУЛЬТАТОВ МОДЕЛИ
+def get_shap_vals(model, X_test, plot=False):
+    """
+    SHAP - оценка вклада разных признаков в таргет модели (!!! логит для классификаторов, предикт для регрессоров)
+    model - обученная модель, X_test - датасет для предсказания величин
+    shap_vals - датасет для каждого семпла и фичи дающий shap (по сути вес) данного признака в предикт по семплу"""
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer(X_test)
+    if plot:
+        # цвет = величина признака (краснее = больше), X = shap_val - чем больше, тем больше вклад в таргет>0, y - фичи
+        shap.summary_plot(shap_values, X_test)
+    return shap_values
+
+def draw_sample_shap(shap_values, sample_num, max_display=10):
+    """используем для отображения shap-диаграммы конкретного тестового семпла чтобы понять из чего складывается предсказание"""
+    shap.waterfall_plot(shap_values[sample_num], max_display=max_display)
+
+def draw_pdp(model, X_train, feature_names, ncols=None, nrows=1, figsize=(12, 4)):
+    """Рисуем зависимость avg(model_predict) от конкретных feature при фиксированных остальных
+    Для линейной регрессии эта зависимость линейная, для других моделей - более сложная (обобщение)
+    model - обученная модель, X_train - датафрем pd с обучающими семплами, feature_names - какие фичи хотим строить"""
+
+    feature_nums = [X_train.columns.get_loc(j) for j in feature_names]
+    if ncols is None:
+        ncols = len(feature_nums)
+    _, ax = plt.subplots(ncols = ncols, nrows=nrows, figsize=figsize)
+    pdp.from_estimator(model, X_train, features=feature_nums, feature_names=feature_names, ax=ax)
