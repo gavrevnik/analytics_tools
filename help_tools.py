@@ -433,3 +433,62 @@ def histogram_visualise(X, bins = 50, xlabel = '', ylabel = '', title = '', figs
     plt.figure(figsize=figsize)
     plt.hist(X, bins=bins, edgecolor='black')
     plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.show()
+
+def describe(input_df, p=None, thr=None, null=None, corr=None):
+    """
+    Описание датасета по ключевым статистикам
+    p = перцентиль по которому хотим посмотреть значения и отсечки в клиентах
+    thr = аналогично перцентилю, но отсечка в виде абсолютного числа
+    null_vals = значения которые будем автоматически обрабатывать как null (например '', np.nan итд); arr
+    return df_describe - датасет с описательными статистиками
+    const, null, corr - наличие константных признаков, с нуллами, имеющих corr=1 с другими
+    """
+    df = input_df.copy()
+    if null is not None:
+        for j in null:
+            df = df.replace(j, np.nan)
+    dt = df.dtypes.reset_index(name='data_type')
+    dtc = df.describe().T[['mean', 'min', 'max', '50%', 'std']].rename(columns={'mean' : 'AVG', '50%' : 'p50'})
+    dt = dt.merge(dtc.reset_index(), on='index', how='left')
+    dt['null_cnt'] = len(df) - df.count().values
+    if corr is not None:
+        cr = df.corr(method='spearman') # быстрее
+        cr = (cr[cr == 1].sum() > 1).astype(int).reset_index(name='corr_')
+        dt = dt.merge(cr, on='index', how='left')
+    if p is not None:
+        df_pc = df[dtc.index].apply(lambda x: np.percentile(x, p)).reset_index(name=f'p{p}')
+        dt = dt.merge(df_pc, how='left')
+        outl = pd.DataFrame(None, columns=['index', f'>p{p}_cnt']); j=0
+        for col in df_pc['index'].values:
+            thr_ = df_pc.loc[df_pc['index'] == col, f'p{p}'].iloc[0]
+            outl.loc[j, :] = col, np.sum(df[col] > thr_); j+=1
+        dt = dt.merge(outl, how='left')
+    if thr is not None:
+        outl = pd.DataFrame(None, columns=['index', f'>{thr}_cnt']); j=0
+        for col in dtc.index:
+            outl.loc[j, :] = col, np.sum(df[col] > thr); j+=1
+        dt = dt.merge(outl, how='left')
+
+    dt['uniq_cnt'] = df.nunique().values
+    dt['const'] = (dt['std'] == 0).astype(int)
+
+    dt = dt.rename(columns={'index' : 'feature'})
+    if input_df.shape[1] != len(dt):
+        return 'size error'
+
+    c_list = ['null_cnt', 'const']
+    total_result = {}
+    total_result['total_dupl_cnt'] = len(df) - df.drop_duplicates().shape[0]
+    total_result['const'] = dt['const'].sum()
+    total_result['total_cnt'] = len(df)
+    total_result['features_cnt'] = len(dt)
+    if corr is not None:
+        total_result['corr'] = dt['corr_'].sum()
+        c_list.append('corr_')
+    total_result['null_cnt'] = dt['null_cnt'].sum()
+    drop_list = ['std']
+    for c in c_list:
+        if total_result[c] == 0:
+            drop_list.append(c)
+    print(total_result)
+    return dt.drop(columns=drop_list)
