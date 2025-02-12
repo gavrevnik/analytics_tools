@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
+import inspect
 
 #### EDA = Exploratory Data Analysis - тулзы для лучшей визуализации и ресреча
 ###### Визуализация
@@ -55,23 +56,37 @@ def get_subplots(size=(15, 5), rows=1, cols=1,
     else:
         return ax
 
-def plot(x = None, y = None, ax = None, style='line', hue=None, size=None, palette = 'viridis'):
+def make_plot(style='line', params = {}, docs = False):
     """
-    отображение графика на полотне ax;
-    x, y зависимые величины (если x is None, то просто по порядку)
-    style = 'line', 'scatter', ...
-    hue, size = числовые отображения для цвета и размера точек графика
+    отображение графиков типа style = line, scatter, hist, joint, pairplot, heatmap, ..
+    params = словарь с данными для отображения соответстующих style графиков
+    также в params можно задать ax - формируемого полотна
+    docs = дать ли документацию о Parameters (если есть)
+    PS. palette = 'viridis' (нужно добавить явно в params)
+
     """
-    if x is None:
-        x = np.arange(len(y))
-    if style == 'line':
-        sns.lineplot(x=x, y=y, ax=ax, hue=hue, size=size, palette=palette)
-    elif style == 'scatter':
-        sns.scatterplot(x=x, y=y, ax=ax, hue=hue, size=size, palette=palette)
+    plot_func_dict = {'line' : sns.lineplot,
+                      'scatter' : sns.scatterplot,
+                      'hist' : sns.histplot,
+                      'joint' : sns.jointplot,
+                      'pair' : sns.pairplot,
+                      'heatmap' : sns.heatmap}
+    plot_func = plot_func_dict[style]
+    if docs:
+        print('список возможных style: ', {k : plot_func_dict[k].__name__ for k in plot_func_dict.keys()})
+        print(f'текущий style = {style}')
+        doc = inspect.getdoc(plot_func)
+        print(doc.split('\nParameters\n')[1].split('\nReturns\n')[0])
+        return
 
+    # default vals init
+    if style in ('line', 'scatter') and params.get('x') is None:
+        params['x'] = np.arange(len(params.get('y')))
+    if style == 'heatmap':
+        params['cmap'] = params.get('cmap', 'coolwarm')
+        params['annot'] = params.get('annot', True)
 
-
-
+    plot_func(**params)
 
 def get_percentile_curve(val_list, per_start = 0, per_end = 100, per_step = 5, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
     """
@@ -83,12 +98,6 @@ def get_percentile_curve(val_list, per_start = 0, per_end = 100, per_step = 5, x
     plt.figure(figsize=figsize)
     plt.plot(per_range, per_list)
     plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.xticks(per_range); plt.show()
-
-def histogram_visualise(X, bins = 50, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
-    """Удобная визуализация для гистограммы с надписями"""
-    plt.figure(figsize=figsize)
-    plt.hist(X, bins=bins, edgecolor='black')
-    plt.title(title); plt.xlabel(xlabel); plt.ylabel(ylabel); plt.grid(); plt.show()
 
 ##### Статистика по датасету
 def describe(input_df, p=None, thr=None, null=None, corr=None):
