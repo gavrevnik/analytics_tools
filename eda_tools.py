@@ -25,6 +25,8 @@ def get_subplots(size=(15, 5), rows=1, cols=1,
     xlabels, ylabels, titles - сетки подписей для графика
     show_grid = рисовать ли сетку на полотнах
     constrained_layout = рисовать сетку графиков без перекрытий
+    --
+    Return ax
     """
     def transform_to_dim2(arr):
         arr = np.array(arr)
@@ -63,7 +65,11 @@ def make_plot(style='line', params = {}, docs = False):
     также в params можно задать ax - формируемого полотна
     docs = дать ли документацию о Parameters (если есть)
     PS. palette = 'viridis' (нужно добавить явно в params)
-
+    PSS. дополнительные значения в params в режиме одиночного отображения графика:
+    figsize, xlabel, ylabel, title
+    --
+    Return
+    отрисованный график либо print(docs)
     """
     plot_func_dict = {'line' : sns.lineplot,
                       'scatter' : sns.scatterplot,
@@ -79,12 +85,46 @@ def make_plot(style='line', params = {}, docs = False):
         print(doc.split('\nParameters\n')[1].split('\nReturns\n')[0])
         return
 
-    # default vals init
+    # значения по умолчанию при отсутствии некоторых параметров
     if style in ('line', 'scatter') and params.get('x') is None:
         params['x'] = np.arange(len(params.get('y')))
     if style == 'heatmap':
         params['cmap'] = params.get('cmap', 'coolwarm')
         params['annot'] = params.get('annot', True)
+
+    # параметры отображения
+    if params.get('ax') is None:
+        # single graph mode, no ax
+        if params.get('figsize') is not None:
+            plt.figure(figsize=params.pop('figsize'))
+        if params.get('xlabel') is not None:
+            plt.xlabel(params.pop('xlabel'))
+        if params.get('ylabel') is not None:
+            plt.ylabel(params.pop('ylabel'))
+        if params.get('title') is not None:
+            plt.title(params.pop('title'))
+        if params.get('xlim') is not None:
+            xlim1, xlim2 = params.pop('xlim')
+            plt.xlim(xlim1, xlim2)
+        if params.get('ylim') is not None:
+            ylim1, ylim2 = params.pop('ylim')
+            plt.ylim(ylim1, ylim2)
+        if params.get('ax') is None:
+            plt.grid()
+    else:
+        ax = params.get('ax')
+        if params.get('xlabel') is not None:
+            ax.set_xlabel(params.pop('xlabel'))
+        if params.get('ylabel') is not None:
+            ax.set_ylabel(params.pop('ylabel'))
+        if params.get('title') is not None:
+            ax.set_title(params.pop('title'))
+        if params.get('xlim') is not None:
+            xlim1, xlim2 = params.pop('xlim')
+            ax.set_xlim(xlim1, xlim2)
+        if params.get('ylim') is not None:
+            ylim1, ylim2 = params.pop('ylim')
+            ax.set_ylim(ylim1, ylim2)
 
     plot_func(**params)
 
