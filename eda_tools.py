@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import MultipleLocator
 import seaborn as sns
 import inspect
 
@@ -76,11 +77,26 @@ def make_plot(style='line', params = {}, docs = False):
                       'hist' : sns.histplot,
                       'joint' : sns.jointplot,
                       'pair' : sns.pairplot,
-                      'heatmap' : sns.heatmap}
+                      'heatmap' : sns.heatmap,
+                      'box' : sns.boxplot,
+                      'bar' : sns.barplot,
+                      'violin' : sns.violinplot}
+    useful_dict = {
+        'line' : 'x,y; hue=цвет; marker=вид точки=o,s; linestyle=--,-.; label=str',
+        'scatter' : 'x,y; hue=цвет; size=размер; marker=вид точки=o,s...; label=str',
+        'hist' : 'x(y); stat={"count", "frequency", "density", "probability"}; bins=int; kde=True; hue=arr(цветовая шкала=len(x)); log_scale=база логарифмирования',
+        'joint' : 'x,y; kind : { "scatter" | "kde" | "hist" | "hex" | "reg" | "resid" }; hue',
+        'pair' : 'data; x_vars,y_vars=data_cols; hue=data_col_name; kind = {"scatter", "kde", "hist", "reg"}; diag_kind : {auto, hist, kde, None}',
+        'heatmap' : 'data; cbar; annot',
+        'box' : 'x, y, hue; x = лучше категориальную; y - переменная для каждого значения x; ',
+        'bar' : 'x, y, hue; x = лучше категориальную; y - переменная для каждого значения x; ci = conf int (или n_boot для симуляции)',
+        'violin' : 'x,y, hue; x = лучше категориальную; y - переменная для каждого значения x'
+    }
     plot_func = plot_func_dict[style]
     if docs:
-        print('список возможных style: ', {k : plot_func_dict[k].__name__ for k in plot_func_dict.keys()})
-        print(f'текущий style = {style}')
+        print(f'ИСПОЛЬЗУЕМ {style} ИЗ ВОЗМОЖНЫХ ', {k : plot_func_dict[k].__name__ for k in plot_func_dict.keys()})
+        print(f'ПОЛЕЗНЫЕ ОПЦИИ ДЛЯ {style}: {useful_dict.get(style)}')
+        print('ДОП ПАРАМЕТРЫ ОТОБРАЖЕНИЯ ГРАФИКА: figsize, xlabel, ylabel, title, xlim, ylim=(a,b), xstep, ystep')
         doc = inspect.getdoc(plot_func)
         print(doc.split('\nParameters\n')[1].split('\nReturns\n')[0])
         return
@@ -91,10 +107,12 @@ def make_plot(style='line', params = {}, docs = False):
     if style == 'heatmap':
         params['cmap'] = params.get('cmap', 'coolwarm')
         params['annot'] = params.get('annot', True)
+        params['cbar'] = params.get('cbar', True)
 
     # параметры отображения
-    if params.get('ax') is None:
+    if params.get('ax') is None and style not in ('pair', 'joint'):
         # single graph mode, no ax
+        plt.grid()
         if params.get('figsize') is not None:
             plt.figure(figsize=params.pop('figsize'))
         if params.get('xlabel') is not None:
@@ -109,8 +127,10 @@ def make_plot(style='line', params = {}, docs = False):
         if params.get('ylim') is not None:
             ylim1, ylim2 = params.pop('ylim')
             plt.ylim(ylim1, ylim2)
-        if params.get('ax') is None:
-            plt.grid()
+        if params.get('xstep') is not None:
+            plt.gca().xaxis.set_major_locator(MultipleLocator(params.pop('xstep')))
+        if params.get('ystep') is not None:
+            plt.gca().yaxis.set_major_locator(MultipleLocator(params.pop('ystep')))
     else:
         ax = params.get('ax')
         if params.get('xlabel') is not None:
@@ -125,7 +145,11 @@ def make_plot(style='line', params = {}, docs = False):
         if params.get('ylim') is not None:
             ylim1, ylim2 = params.pop('ylim')
             ax.set_ylim(ylim1, ylim2)
-
+        if params.get('xstep') is not None:
+            ax.xaxis.set_major_locator(MultipleLocator(params.pop('xstep')))
+        if params.get('ystep') is not None:
+            ax.yaxis.set_major_locator(MultipleLocator(params.pop('ystep')))
+    #
     plot_func(**params)
 
 def get_percentile_curve(val_list, per_start = 0, per_end = 100, per_step = 5, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
