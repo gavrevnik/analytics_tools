@@ -80,7 +80,7 @@ def ttest_calc(metric_1, metric_2 = None, alpha = 0.05, alternative = 'two-sided
             conf_int_mean_relative_diff = conf_rel_diff_delta_method(metric_1, metric_2, alpha)
 
     elif alternative == 'less': # h1: mean_diff < 0
-        t = stats.t.ppf(alpha, df=df)
+        t = stats.t.ppf(1 - alpha, df=df)
         cdf_stat = stats.t.cdf(mean_diff / se, df=df)
         p_val = cdf_stat # p_val > alpha -> h0: mean_diff >= 0
         confint = (-np.inf, mean_diff + t * se) # confint[1] < 0 -> h1
@@ -120,7 +120,7 @@ def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4,
     p_val = q_ * 2 if 0 < np.mean(boot_list) else (1 - q_) * 2
     return confint, p_val
 
-def bootstrap_poisson_calc(metric_1, mertic_2, n_iter = 10**4, X1 = None, X2 = None, alpha = 0.05):
+def bootstrap_poisson_calc(metric_1, metric_2, n_iter = 10**4, X1 = None, X2 = None, alpha = 0.05):
     """Оцениваем разницу средних взвешивая на базе распределения Пуассона
     Работает корректно для больших выборок len(metric)>10**3
     Веса X1,2 ~ Poisson(1) могут быть сгенерированы и записаны в память заранее
@@ -170,7 +170,7 @@ def multitest_calc(p_value_list, alpha = 0.05, alpha_type = 'fwer'):
     return: список решений по тестам на уровне alpha; p_val_corrected; alpha_adj - уменьшенное на множественную поправку
     """
     # holm = аналог Бонферрони, но мощнее; fdr_bh = Benjamini/Hochberg оптимален для контроля FDR
-    decision_list, p_val_corrected, alpha_adj, _ = multipletests(p_value_list, alpha = 0.05, method=alpha_type.replace('fwer','holm').replace('fdr', 'fdr_bh'))
+    decision_list, p_val_corrected, alpha_adj, _ = multipletests(p_value_list, alpha = alpha, method=alpha_type.replace('fwer','holm').replace('fdr', 'fdr_bh'))
     return decision_list, p_val_corrected, alpha_adj
 
 
@@ -398,3 +398,22 @@ def ols_calc(df, y = 'Y', x = ['X'], smf_formula = None, weight = None, regul_al
         info['R^2'] = model.rsquared
     # финальный результат - dataframe + fit model
     return info, model
+
+###### ПРИЛОЖЕНИЕ: дополнительные способы оценки относительных дов интервалов для T-распределения
+def conf_rel_diff_cohavi(X, Y, alpha = 0.05):
+    # оценка относительного эффекта по Kohavi - приближенное разложение
+    # https://www.researchgate.net/publication/220451900_Controlled_experiments_on_the_web_Survey_and_practical_guide
+    # дает схожий эффект что и при дельта методе (который реализован в ttest_calc)
+    def welch_df(s1, s2, n1, n2):
+        return ( (s1**2 / n1 + s2**2 / n2) ** 2 /
+                ( ( (s1**2 / n1) ** 2 / (n1 - 1) ) +
+                ( (s2**2 / n2) ** 2 / (n2 - 1) ) ) )
+    df = welch_df(np.std(X), np.std(Y), len(X), len(Y))
+    t = stats.t.ppf(1 - alpha / 2, df=df)
+    mean1, mean2 = np.mean(X), np.mean(Y)
+    std1 = np.std(X) / np.sqrt(len(X))
+    std2 = np.std(Y) / np.sqrt(len(Y))
+    cv1, cv2 = std1 / mean1, std2 / mean2
+    rel_diff = (mean2 - mean1) / mean1
+    conf_rel_diff = (rel_diff + 1) * (1 + np.array([-1, 1]) * t * np.sqrt(cv1**2 + cv2**2 - t**2 * cv1**2 * cv2**2) / (1 - t * cv1 ** 2)) - 1
+    return conf_rel_diff
