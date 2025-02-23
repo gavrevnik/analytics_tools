@@ -93,11 +93,11 @@ def ttest_calc(metric_1, metric_2 = None, alpha = 0.05, alternative = 'two-sided
 
     return confint, p_val, alternative, conf_int_mean_relative_diff
 
-def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4, alpha = 0.05, diff_type = 'abs'):
+def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4, alpha = 0.05, diff_type = 'abs', adj_small = False):
     """Использование семплирования для оценки разницы статистик stat_func(X) на двух или одной метрике
     test_func -> это может быть среднее, медиана или др статистики
     diff_type = 'abs', 'rel'; для abs: diff = Y-X; для rel: diff = (Y-X)/X; работает только для двух выборок
-    PS. для очень малых len(metric)<100-200 нужны поправки на смещение - здесь не учитываем
+    adj_small = корректировка смещения бутстрапа на малых выборках, есть смысл включать при len(metric) < 100-200
     return confint_test_stat_diff, p_value
     """
     boot_list = [] # sampling
@@ -114,9 +114,21 @@ def bootstrap_calc(metric_1, metric_2 = None, stat_func = np.mean, iter = 10**4,
             elif diff_type == 'rel':
                 diff = (s2 - s1) / s1
             boot_list.append(diff)
+
+    if adj_small:
+        # оценка по исходной выборке
+        s1, s2 = stat_func(metric_1), stat_func(metric_2)
+        if diff_type == 'abs':
+                diff = s2 - s1
+        elif diff_type == 'rel':
+                diff = (s2 - s1) / s1
+        # часто разница средних для семплируемой статистики stat_func хорошая оценка смещения
+        # но иногда лучше использовать для оценки сдвига другие функции например разница между квантилями для исходной выборки и семплирования
+        bias = np.mean(boot_list) - diff
+        boot_list = [j - bias for j in boot_list]
+
     confint = np.percentile(boot_list, 100 * (alpha / 2)), np.percentile(boot_list, 100 * (1 - alpha / 2))
-    # p val calc
-    q_ = stats.norm.cdf(x=0, loc=np.mean(boot_list), scale=np.std(boot_list, ddof=1))
+    q_ = stats.norm.cdf(x=0, loc=np.mean(boot_list), scale=np.std(boot_list, ddof=1)) # p val calc
     p_val = q_ * 2 if 0 < np.mean(boot_list) else (1 - q_) * 2
     return confint, p_val
 
