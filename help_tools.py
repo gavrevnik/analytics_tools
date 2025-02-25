@@ -13,6 +13,7 @@ from statsmodels.stats.multitest import multipletests
 from statsmodels.stats.power import tt_ind_solve_power
 from sklearn.neighbors import KNeighborsRegressor
 import seaborn as sns
+from joblib import Parallel, delayed
 
 ####### СТАТИСТИЧЕСКИЕ ТЕСТЫ
 def fraq_to_list(num, denum):
@@ -253,30 +254,87 @@ def validation_ttest(X, backets_cnt = 10, aa_test_cnt = 10**4, alpha = 0.05):
     # при необходимости можно визуализировать списки через get_visualisation
     return ans, p_val_list, avg_list
 
-def stat_test_errors_estimate(metric_hist = None, stat_test = None, sample_size = 10**3, effect=0, iter=10**2, alpha = 0.05):
+def simulate_test(stat_test,
+                  effect_type = 'loc',
+                  effect_range = [0, 1, 2, 3],
+                  metric_dist = 'normal',
+                  metric_size = 500,
+                  metric_cnt = 2,
+                  metric_dist_params = {'scale' : 1},
+                  iter_cnt = 500,
+                  parallel = True):
+    """Симуляция критерия stat_test с поиском ошибок первого и второго рода на синтетических или реальных данных
+    effect_type - название параметра который смещаем для эмуляции a/b (например матожидание; loc)
+    effect_range - список смещений (когда 0 - режим a/a теста и проверяем ошибку первого рода)
+    metric_dist = normal, exponential, uniform или кастомное (см пример в доке ниже metric_dist_example)
+    metric_size = размер сравниваемых веток
+    metric_cnt = кол-во сравниваемых веток (2 = a/b)
+    metric_dist_params = фикс параметры распределений (их не варьируем)
+    iter_cnt = кол-во симуляций на каждое смещение
+    parallel = распараллеливаем вычисление по ядрам
+    return df = ср и дов интервалы для ошибок 1 и 2 рода для каждого смещения
     """
-    https://habr.com/ru/companies/X5Tech/articles/706388/
-    Оценка мощности и FPR критерия на выбранном распределении metric_hist - может быть сэмулировано, либо взято из истории
-    stat_test = стат критерий в формате stat_func(x, y)
-    sample_size = размер генерируемых выборок (должен быть примерно как в ожидаемом ab)
-    effect = ожидаемый детектируемый эффект для данных выборок
-    Семплируем пары тестов из начального распределения
-    """
-    def ttest(a, b):
-        return stats.ttest_ind(a, b).pvalue
-    if metric_hist is None: # если не указано - эмулируем сами тестовое
-            metric_hist = np.random.normal(1, 1, 10**4)
-    if stat_test is None:
-        stat_test = ttest
-    pvalues_aa, pvalues_ab = [], []
-    for _ in range(iter):
-        a1, a2 = np.random.choice(metric_hist, size=(2, sample_size), replace=False)
-        b = a2 + effect
-        pvalues_aa.append(stat_test(a1, a2))
-        pvalues_ab.append(stat_test(a1, b))
-    ch1, ch2 = (np.array(pvalues_aa) < alpha).astype(int), (np.array(pvalues_ab) >= alpha).astype(int)
-    first_type_error, second_type_error = ttest_calc(ch1)[0], ttest_calc(ch2)[0]
-    return first_type_error, second_type_error
+
+    # в противном случае передается кастомный metric_dist()
+    if metric_dist == 'normal':
+        metric_dist = np.random.normal
+    if metric_dist == 'exponential':
+        metric_dist = np.random.exponential
+    if metric_dist == 'uniform':
+        metric_dist = np.random.uniform
+
+    pos_res = []; pos_res_conf = []; neg_res = []; neg_res_conf = []
+    for eff in effect_range:
+
+        # изготовим большой батч данных, затем будем нарезать его на тесты
+        # a/a (n-1 ветка)
+        metric_dist_params[effect_type] = 0
+        metric_dist_params['size'] = (iter_cnt * metric_size, metric_cnt - 1)
+        metric_arr = metric_dist(**metric_dist_params)
+        # a/b (последняя ветка выборки)
+        metric_dist_params['size'] = iter_cnt * metric_size
+        metric_dist_params[effect_type] = eff
+        eff_metric = metric_dist(**metric_dist_params)
+        # стекаем все вместе
+        metric_arr = np.column_stack((metric_arr, eff_metric))
+        # должен быть metric_arr.shape = (iter_cnt * metric_size, metric_cnt)
+        # при кастомных метриках metric_dist размер вдоль X может отличаться - семплируем корректно:
+        if metric_arr.shape[0] != iter_cnt * metric_size:
+            idx = np.random.choice(metric_arr.shape[0], size=iter_cnt * metric_size, replace=False)
+            metric_arr = metric_arr[idx]
+        # массив тестов
+        chunk_list = np.vsplit(metric_arr, iter_cnt)
+        res = []
+        if parallel:
+            res = Parallel(n_jobs=-1)(delayed(stat_test)(np.hsplit(chunk, metric_cnt)) for chunk in chunk_list)
+        else:
+            for chunk in chunk_list:
+                res.append(stat_test(np.hsplit(chunk, metric_cnt))) # input = массив метрик [X, Y, ...]
+
+        # считаем средние и дов интервалы
+        res_inv = [1 if j == 0 else 0 for j in res]
+        pos_res.append(100 * np.mean(res)); pos_res_conf.append(np.round(100 * ttest_calc(res)[0], 2))
+        neg_res.append(100 * np.mean(res_inv)); neg_res_conf.append(np.round(100 * ttest_calc(res_inv)[0], 2))
+
+    df_stat = pd.DataFrame({'effect_shift' : effect_range,
+                            'type I error' : np.round(pos_res, 2), 'type I error conf' : pos_res_conf,
+                             'type II error' : np.round(neg_res, 2), 'type II error conf' : neg_res_conf })
+    df_stat.loc[df_stat.effect_shift == 0, 'type II error'] = ''; df_stat.loc[df_stat.effect_shift == 0, 'type II error conf'] = ''
+    df_stat.loc[df_stat.effect_shift > 0, 'type I error'] = ''; df_stat.loc[df_stat.effect_shift > 0, 'type I error conf'] = ''
+    return df_stat
+
+def stat_test_example(metric_arr):
+    alpha = 0.05
+    p_value = ttest_calc(metric_arr[0], metric_arr[1], alpha=alpha)[1]
+    return int(p_value < alpha)
+
+def metric_dist_example(scale, loc, size):
+    # примесь выбросов = 10%
+    if isinstance(size, tuple): # a/a batch
+        size_outl = (int(0.1 * size[0]), size[1])
+    else: # a/b branch
+        size_outl = int(0.1 * size)
+    return np.append(np.random.normal(loc = loc, scale=scale, size=size), np.random.normal(loc=500, size=size_outl))
 
 
 ####### ПОВЫШЕНИЕ ЧУВСТВИТЕЛЬНОСТИ
@@ -315,16 +373,13 @@ def cuped_calc(df, x = ['Y_prev'], y = 'Y', T = 'exp_group', method = 'ols', df_
     Y = df[y].values; Y_adj = Y - (Y_forecast - np.mean(Y_forecast))
     return Y_adj
 
-def cuped_simple(df, y = 'Y', y_cov = 'Y_cov', treatment_name = 'exp_group'):
+def cuped_simple(Y, Y_cov):
     """
-    Получаем Y_adj из предиктивной ковариаты (Y_previous или берем из модели)
-    Главное условие np.cov(exp_group, Y_pred) = 0!
+    Получаем Y_adj из предиктивной ковариаты (Y_cov = Y_prev или берем из ML модели)
+    Главное условие np.cov(exp_group, Y_cov) = 0, независимость сплитования и ковариты
     """
-    treatment = df[treatment_name].replace('control', 0).replace('experiment', 1).values
-    Y_cov = df[y_cov].values; Y = df[y].values
     theta = np.cov(Y_cov, Y)[0, 1] / np.var(Y_cov)
     Y_adj = Y - theta * (Y_cov - np.mean(Y_cov))
-    print(f'corr(T, Y_cov) = {np.round(np.corrcoef(treatment, Y_cov)[0, 1], 4)}; corr(Y, Y_cov) = {np.round(np.corrcoef(Y, Y_cov)[0, 1], 4)}; theta = {np.round(theta, 4)}')
     return Y_adj
 
 ####### ПРЕОБРАЗОВАНИЯ МЕТРИК

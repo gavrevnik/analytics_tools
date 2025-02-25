@@ -5,6 +5,7 @@ import matplotlib
 from matplotlib.ticker import MultipleLocator
 import seaborn as sns
 import inspect
+from IPython.core.display import display, HTML
 
 #### EDA = Exploratory Data Analysis - тулзы для лучшей визуализации и ресреча
 ###### Визуализация
@@ -151,6 +152,14 @@ def make_plot(style='line', params = {}, docs = False):
             ax.yaxis.set_major_locator(MultipleLocator(params.pop('ystep')))
     #
     plot_func(**params)
+
+def display_df(df_list):
+    """Отображение датафреймов из df_list в один ряд в Jupyter"""
+    html = """<div style="display: flex; gap: 20px;">"""
+    for df in df_list:
+        html = html + f'<div>{df.to_html()}</div> '
+    html = html + '</div>'
+    display(HTML(html))
 
 def get_percentile_curve(val_list, per_start = 0, per_end = 100, per_step = 5, xlabel = '', ylabel = '', title = '', figsize=(10, 6)):
     """
